@@ -3,7 +3,46 @@ import gzip
 import shutil
 dir_name = "C:/Users/asus/Desktop/pdl/data_done/" #dir to data 
 files = [name for name in os.listdir(dir_name) if os.path.isfile(os.path.join(dir_name, name))] #list of files in data
-
+def select_case_1(i):
+	switcher={
+		1: keydet_rv.r01 = "",
+		2: keydet_rv.r02 = "",
+		3: keydet_rv.r03 = "",
+		4: keydet_rv.r04 = "",
+		5: keydet_rv.r05 = "",
+		6: keydet_rv.r06 = "",
+		7: keydet_rv.r07 = "",
+		8: keydet_rv.r08 = "",
+		9: keydet_rv.r09 = "",
+		10:keydet_rv.r10 = "",
+		11:keydet_rv.r11 = "",
+		12:keydet_rv.r12 = "",
+		13:keydet_rv.r13 = "",
+		14:keydet_rv.r14 = ""
+			
+	}
+	return switcher.get(i,"Invalid keydet_f")
+def select_case_2(i):
+	switcher={
+		1: keydet_rv.r01 = keydet_rv.r01 & chr(tmp),
+		2: keydet_rv.r02 = keydet_rv.r02 & chr(tmp),
+		3: keydet_rv.r03 = keydet_rv.r03 & chr(tmp),
+		4: keydet_rv.r04 = keydet_rv.r04 & chr(tmp),
+		5: keydet_rv.r05 = keydet_rv.r05 & chr(tmp),
+		6: keydet_rv.r06 = keydet_rv.r06 & chr(tmp),
+		7: keydet_rv.r07 = keydet_rv.r07 & chr(tmp),
+		8: keydet_rv.r08 = keydet_rv.r08 & chr(tmp),
+		9: keydet_rv.r09 = keydet_rv.r09 & chr(tmp),
+		10:keydet_rv.r10 = keydet_rv.r10 & chr(tmp),
+		11:keydet_rv.r11 = keydet_rv.r11 & chr(tmp),
+		12:keydet_rv.r12 = keydet_rv.r12 & chr(tmp),
+		13:keydet_rv.r13 = keydet_rv.r13 & chr(tmp),
+		14:keydet_rv.r14 = keydet_rv.r14 & chr(tmp)
+	
+	}
+	return switcher.get(i,"Invalid keydet_f")
+        
+	
 class parskey(): #структура ключа
 	def _init_(self):
 		pass
@@ -368,33 +407,179 @@ nbuf = 0
 ns = 0
 nfds = 0
 nofs = 0
-'''
+ hex_file = open("C:/Users/asus/Desktop/pdl/data_done/ARS20190301082039.bill.bin", "rb") 
 
+info = [] #list of all bytes
+chunk = hex_file.read(1)
+while chunk:
+	info.append(chunk)
+	chunk = hex_file.read(1)
+print(len(info))
+info_cut = info[:65]
+buff = []
+nbuf = len(buff)
 
-for file in files:
-	hex_file = open(dir_name + file, "rb") 
-	
-	buff = []
-	
-	if len(buff)<60:
-		hex_file.seek(1)	 # Go to the current position of the file
-		tmp = hex_file.read(1)
-		buff.append(tmp)
+for tmp in info_cut:
+	if nbuf<60:
+		buff.append(tmp)		
+		nbuf +=	1
 	else:
-		for i in nbuf:
-		if i<60:
-			offset.remove(0)
-			offset.append()
-	print(offset)
+		del buff[0]
+		buff.append(tmp)
+		print(buff)
+	print(tmp)
 	
-	
-# Seek can be called one of two ways:
-#	x.seek(offset)
-#	x.seek(offset, starting_point)
-# Seek a specific position in the file and read N bytes
-	
-# starting_point can be 0, 1, or 2
-# 0 - Default. Offset relative to beginning of file
-# 1 - Start from the current position in the file
-# 2 - Start from the end of a file (will require a negative offset)
-'''
+buf_txt = ""
+for j in range(nbuf):
+	buf_txt = buf_txt & str(buff(j)) #line = ser.readline().decode()
+mdrk = ""
+for j in range(nbuf, nbuf - 8, -1):
+	if j = 0:
+		break
+	mdr_hi = buff(j)\16
+	mdr_lo = buff(j) - 16 * mdr_hi
+	mdrk = hexbute(mdr_hi) & hexbute(mdr_lo) &mdrk
+if (cid.readvalue() > 0 and vypiska.eadvalue() > 0 ) or (ns = 1):
+	if mdrk = keydet_k:
+		keydet_st = 1
+		keydet_f = 0
+		keydet_of = 4
+		keydet_rb = 0
+		keydet_ds = 0
+		keydet_rd = 0
+	elif (keydet_st = 1) and (keydet_f = 0) and keydet_rb = 0 :
+		keydet_ns = buff(nbuf)
+		keydet_rb = keydet_of + 1
+		keydet_st = 0
+		keydet_f = keydet_f + 1
+		if keydet_f = 3:
+			if Trim(keydet_rv.r02) = "1" or nfds = 1:
+				#Debug.Print "Ok1"
+				nfds = 1
+			else:
+				keydet_rv.r01 = ""
+				keydet_rv.r02 = ""
+				keydet_or = 0
+				keydet_st = 0
+				keydet_ds = 0
+				keydet_f = 0
+				keydet_of = 4
+				#GoTo exit_cycle
+		#---
+		keydet_rd = 0
+		if keydet_ns = 0:
+            keydet_rv.r01 = ""
+            keydet_rb = 0
+            keydet_f = keydet_f + 1
+            #---
+            if keydet_f = 3 or keydet_f = 11 or keydet_f = 13: 
+				keydet_of = 4 #--5
+	elif (keydet_st = 0) and (keydet_f > 0) and (keydet_f < keydet_nc + 1) and keydet_rb <= keydet_of:
+		keydet_rb = keydet_rb + 1
+		if keydet_rb = keydet_of + 1:
+            if keydet_f > 1:
+				keydet_ns = buff(nbuf)
+				if keydet_f = 3 and keydet_ns < 10 and keydet_ns <> 0:
+					keydet_ns = 10
+					keydet_of = 5
+					nofs = 1
+			if keydet_ns = 0:
+				select_case_1(keydet_f)
+				
+				keydet_rb = 0
+				keydet_f = keydet_f + 1
+				#---
+				if keydet_f = 3 or keydet_f = 11 or keydet_f = 13:
+					keydet_of = 4 #--5
+              
+              #---
+				if keydet_f = 3:
+					if Trim(keydet_rv.r02) = "1" or nfds = 1:
+                  #Debug.Print "Ok3"
+						nfds = 1
+					else:
+						keydet_rv.r01 = ""
+						keydet_rv.r02 = ""
+						keydet_or = 0
+						keydet_st = 0
+						keydet_ds = 0
+						keydet_f = 0
+						keydet_of = 4
+                  # GoTo exit_cycle
+
+				keydet_rd = 0
+    elif (keydet_st = 0) and (keydet_f > 0) and (keydet_f < keydet_nc + 1) and (keydet_rb >= keydet_of) and (keydet_rd < keydet_ns):
+		keydet_rd = keydet_rd + 1
+		select_case_2(keydet_f)
+		
+        if keydet_rd = keydet_ns:
+            keydet_rb = 0
+            keydet_f = keydet_f + 1
+            keydet_of = 4
+            #---
+            if (keydet_f = 3 or keydet_f = 11 or keydet_f = 13) and nofs = 1:
+				keydet_of = 5 #--5--01
+            
+            #---IsNumeric
+            if keydet_f = 3: #509line
+				if keydet_rv.r02.strip() = "1" \
+					or (nfds = 1 and (keydet_rv.r02.strip()).isnumeric()):
+					#Debug.Print "Ok2"
+					nfds = 1
+                else:
+					keydet_rv.r01 = ""
+					keydet_rv.r02 = ""
+					keydet_rv.r03 = ""
+					keydet_rv.r04 = ""
+					keydet_rv.r05 = ""
+					keydet_rv.r06 = ""
+					keydet_rv.r07 = ""
+					keydet_rv.r08 = ""
+					keydet_rv.r09 = ""
+					keydet_rv.r10 = ""
+					keydet_rv.r11 = ""
+					keydet_rv.r12 = ""
+					keydet_rv.r13 = ""
+					keydet_rv.r14 = ""
+					keydet_or = 0
+					keydet_st = 0
+					keydet_ds = 0
+					keydet_f = 0
+					keydet_of = 4
+			keydet_rd = 0
+        
+    elif (keydet_f = keydet_nc + 1):
+        mdrn = mdrn + 1
+        ReDim Preserve mdr(mdrn)
+        #keydet_rv.r14 = Left(keydet_rv.r14, keydet_ns)
+        mdr(mdrn) = keydet_rv
+        #Debug.Print keydet_rv.r01 & " " & keydet_rv.r02 & " " & keydet_rv.r03 & " " & keydet_rv.r04 & " " & keydet_rv.r05 & " " & keydet_rv.r06 & " " _
+        #& keydet_rv.r07 & " " & keydet_rv.r08 & " " & keydet_rv.r09 & " " & keydet_rv.r10 & " " & keydet_rv.r11 & " " & keydet_rv.r12 & " " _
+        #& keydet_rv.r13 & " " & keydet_rv.r14
+        
+        keydet_rv.r01 = ""
+        keydet_rv.r02 = ""
+        keydet_rv.r03 = ""
+        keydet_rv.r04 = ""
+        keydet_rv.r05 = ""
+        keydet_rv.r06 = ""
+        keydet_rv.r07 = ""
+        keydet_rv.r08 = ""
+        keydet_rv.r09 = ""
+        keydet_rv.r10 = ""
+        keydet_rv.r11 = ""
+        keydet_rv.r12 = ""
+        keydet_rv.r13 = ""
+        keydet_rv.r14 = ""
+        keydet_or = 0
+        keydet_st = 0
+        keydet_ds = 0
+        keydet_f = 0
+        keydet_of = 4
+        
+      
+#-----
+if nfds = 1 and (cid.readvalue() > 0 and vypiska.eadvalue() > 0 ):
+	nfds = 0
+    nofs = 0
+	#578 line
