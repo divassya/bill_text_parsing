@@ -948,14 +948,14 @@ for i in range(1,16): #867
 							break
 							
 					break
-def exit_cycle():
+'''def exit_cycle():
 	continue
 
 hex_file.close()
 f6.close()
 f5.close()
 f4.close()
-pars_data4 = ncf
+pars_data4 = ncf'''
 
 	
 

@@ -1,3 +1,8 @@
 __pycache__/
 hex/
 Far Manager/
+*.exe
+src/.ipynb_checkpoints/
+*.ipynb
+Gateway_cert.7z
+Gateway_cert/

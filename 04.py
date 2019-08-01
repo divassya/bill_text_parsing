@@ -16,7 +16,7 @@ nbuf = len(buff)
 
 for tmp in info_cut:
 	if nbuf<60:
-		buff.append(tmp)		
+		buff.append(tmp)
 		nbuf +=	1
 	else:
 		del buff[0]
