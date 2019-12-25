@@ -1,0 +1,2106 @@
+1) 1.1 что такое SQL, 
+     1.2 программы для SQL,  
+     1.3 БД ORACLE EXPRESS
+     1.4 синтаксис базового оператора DML SELECT
+2) 2.1 таблицы и их свойства
+     2.2 запрос данных из таблицы(dual, view)
+     2.3 словарь БД
+    2.4 вариации синтаксиса оператора SELECT, псевдо столбцы
+3) 3.1 типы данных(char, varchar2, date, number, timestamp)
+     3.2 значение null
+     3.3 преобразование данных
+     3.4 блок where, построение условий выборки
+4) 4.1 вычисляемые поля
+     4.2 некоторые встроенные функции ORACLE
+     4.3 условный выбор CASE, greatest, least, coalesce, nvl, decode
+     4.4 собственные функции пользователя
+5) 5.1 ANSI SQL
+     5.2 применение ANSI и ORACLE синтаксиса
+     5.2 псевдо данные для проверки правильности SQL запросов и генерации данных
+6) 6.1 преобразование данных, group 
+     6.2 некоторые групповые функции, блок having
+     6.3 cube, rollup
+     6.4 применение вычисляемых полей
+7) 7.1 некоторые аналитические функции
+     7.2 окна данных
+     7.3 вычисляемые поля и применение аналитические функции в запросах
+8) 8.1 выгрузка данных SQLPLUS
+     8.2 загрузка данных SQLLDR
+     8.3 обработка больших блоков данных(merge, create as select, insert select error, rename, drop, truncate)
+
+
+1.1 что такое SQL///
+SQL (structured query language — «язык структурированных запросов») — язык программирования, применяемый для создания, модификации и управления данными в реляционной базе данных, управляемой соответствующей системой управления базами данных.
+RDBMS:  ORACLE, MySQL,MSSQL Server и др.
+SQL нативный – поддерживаются все доступные возможности БД
+ANSI SQL – синтаксис и набор операторов SQL, соответствующие требованиям стандарта 
+Американского национальный института стандартов (англ. American national standards institute, ANSI).
+Нативный SQL опережает ANSI SQL по функциональности, т.к. в ANSI SQL попадают обобщенные реализованные возможности нативных SQL различных баз данных.
+ORACLE поддерживает ANSI SQL.
+В курсе будет использована база данных ORACLE
+
+ 1.2 программы для SQL///
+Обеспечивают пользовательский интерфейс для выполнения скриптов на БД. Некоторые программы, используемые для работы с ORACLE: 
+1)Oracle SQL Developer – бесплатный, написан на JAVA, доступен для скачивания на сайте ORACLE, графический пользовательский интерфейс, работает без клиента ORACLE;
+2)Oracle SQLplus - бесплатный, включен в дистрибутив клиента/сервера ORACLE, коммандная строка, работает c клиентом ORACLE;
+3)PLSQLDeveloper – условно бесплатный, 30 дневный бесплатный пробный период, графический пользовательский интерфейс, работает c клиентом ORACLE;
+
+1.3 БД ORACLE EXPRESS ///
+Oracle Application Express (сокращённо именуется как Oracle Apex, APEX, ранее называлась Oracle HTMLDB) — свободная среда быстрой разработки прикладного программного обеспечения на основе СУБД Oracle Database, целиком реализованная как веб-приложение. Все элементы, возникающие в цикле разработки приложения в данной среде хранятся непосредственно в инфраструктуре Oracle Database, тем самым обеспечивается совместная работа разработчиков и контроль версий без использования файлов и дополнительных систем управления версиями.
+
+База данных(БД) поддерживает максимальную функциональность имеет минимум ограничений (из лицензионного соглашения): 
+1. Express Edition is limited to a single instance on any server; 
+2. Express Edition may be installed on a multiple CPU server, but may only be executed on one processor in any server; 
+3. Express Edition may only be used to support up to 11GB of user data (not including Express Edition system data); 
+4. Express Edition may use up to 1 GB RAM of available memory.
+
+Для  обучения оптимально использовть локальную базу так, как нет ограничений по доступу как в рабочих базах.
+
+1.4 синтаксис базового оператора DML SELECT///
+DML(Data Manipulation Language) : SELECT,INSERT,UPDATE,DELETE,MERGE
+
+select::=subquery::=
+
+выделенные конструкции будут рассмотрены в базовом достаточном объеме далее, для полного изучения необходимо обратится к документации ORACLE
+
+
+Последовательно будут рассмотрены конструкции:
+subquery_factoring_clause(WITH query_name AS (sub_query), ...) ; - предопределенные вьюшки с доступом в других блоках запроса
+
+select_list(ALL, DISTINCT, ROWNUM, ROWID, функции); - набор возвращаемых полей запросом
+
+table_reference( sub_query, TABLE, VIEW, PARTITION, SAMPLE, JOIN LEFT, RIGHT, FULL OUTER,) – источники данных с правилами их соединения
+
+where_clause(AND,OR, NOT, IN, IS NULL, LIKE, BETWEEN AND,(),=,!=,<>,>=, <= ) – фильтр выборки данных
+
+hierarchical_query_clause(START WITH, CONNECT BY, PRIOR, LEVEL, SYS_CONNECT_BY_PATH, NOCYCLE, CONNECT_BY_ISCYCLE) – порядок выборки иерархических данных
+
+group_by_clause, having(GROUP BY, CUBE, ROLLUP, HAVING) – группировка данных 
+
+UNION,...( UNION,ALL,MINUS,INTERSECT) – объединение данных запросов
+
+ order_by_clause – сортировка результата данных
+
+
+ 2.1 таблицы и их свойства.///
+Таблица – объект в БД, для хранения структурированных данных, структура определяется набором полей.  Может включать дополнительные объекты: PARTITION, INDEX. Таблица находится в схеме пользователя который ее создал. При обращении к таблице в SQL необходимо указывать схему нахождения. Если создан SYNONYM, то обращение с его использованием автоматически будет учитывать схему и имя объекта указанного в синониме 
+
+PARTITION – таблица являющаяся частью сновной таблицы заполняемая записями по правилам партиционирования. Используются для облегчения доступа к данным, например за период, если партиционирование по дате события, для реализации процессов архивирования и т.д.. 
+
+INDEX – структура связанная с таблицей для быстрого доступа к данным при использовании в запросе индексированного поля, эффективно работает при извлечении из таблицы до 5% данных от общего количества. Для партиционированный таблицы индекс может быть локальным, для каждой партиции свой экземпляр и глобальный – для всех партиций общий. В таблице может быть более 1 индекса, но для 1 последовательности полей может быть только 1 индекс.
+
+Пользователь может обращаться к таблицам, на которые у него есть доступ.
+
+2.2 запрос данных из таблицы(dual, view)///
+
+DUAL  вспомогательная таблица, содержит 1 строку с текстовым значением ‘X’ в столбце ‘DUMMY’
+select * from dual, таблица находится в схеме SYS.DUAL, создан PUBLIC SYNONYM и у всех пользователей есть на нее доступ. Применяется для генерации данных и в PL/SQL блоках для доступа к SEQUENCE.
+
+например: запрос возвращающий 3 строки со значениями (1,2,3)
+select  1 n from dual union all select  2 n from dual union all select  3 n from dual
+
+VIEW(вьюшка) – сохраненный SQL блок, упрощает написание запросов с часто используемым SQL, позволяет назначать персональный доступ как на таблицы
+
+sys:
+create or replace view list_3v as
+  select  1 n, 'Row:1' c from dual union all select  2 n, 'Row:2' c from dual union all select  3 n, 'Row:3' c from dual   
+
+select * from  list_3v
+
+create or replace public synonym list_3v for sys.list_3v
+
+create user dummy identified by dummy default tablespace USERS temporary tablespace TEMP profile DEFAULT;
+grant create session to dummy
+grant select on sys.list_3v to dummy
+
+dummy:
+select * from LIST_3V
+select * from sys.LIST_3V
+
+применяется для изоляции програмного обеспечения от БД, ограничения доступа к данным на уровне условия и при необходимости ограничить доступ по результирующим полям.
+
+sys:
+create or replace view list_3v2 as select c from list_3v
+grant select on sys.list_3v2 to dummy
+create or replace view list_3v3 as select * from list_3v where n > 1
+grant select on sys.list_3v3 to dummy
+
+ dummy:
+select * from sys.list_3v2
+select * from sys.list_3v3
+
+2.3 словарь БД///
+Словарь – набор таблиц в схеме SYS содержащих описание объектов и свойств БД. Данные для проссмотра доступны через системные вьюшки.
+dummy:
+select * from all_objects – позволяет посмотреть доступные пользователю объекты
+
+
+select * from all_objects where object_type = 'VIEW' 
+and object_name like 'ALL%' and owner = 'SYS'
+позволяет получить список системных вьюшек, все GUI программы для работы с ORACLE формируют списки объектов и их свойств из данных вьюшек. По наименованию вьюшки интуитивно можно определить, данные отображаемые в них. Вьюшки отображают данные только по доступным пользователю объектам.
+некоторые из них:
+база oracle SE прод на который есть доступ:
+create table test_tab ( a number, b date, c varchar2(100))
+partition by range(b) SUBPARTITION BY HASH (a) SUBPARTITIONS 4
+(
+partition test_tab201710 values less than (to_date('20171101','YYYYMMDD')),
+partition test_tab201711 values less than (to_date('20171201','YYYYMMDD'))
+)
+CREATE INDEX test_tab_c_ix ON test_tab (c) local;
+CREATE INDEX test_tab_a_ix ON test_tab (a);
+
+select * from ALL_TAB_PARTITIONS where table_name = 'TEST_TAB'
+select * from ALL_SUBPART_KEY_COLUMNS where name = 'TEST_TAB'
+select * from ALL_PART_TABLES where table_name = 'TEST_TAB'
+select * from ALL_PART_KEY_COLUMNS where name = 'TEST_TAB'
+select * from ALL_PART_INDEXES where table_name = 'TEST_TAB'
+select * from ALL_IND_SUBPARTITIONS where index_name = 'TEST_TAB_C_IX'
+select * from ALL_IND_PARTITIONS where index_name = 'TEST_TAB_C_IX' 
+
+drop table test_tab purge
+
+sys:
+create table test_tab2 ( a number, b date, c varchar2(100))
+CREATE INDEX test_tab2_a_ix ON test_tab2 (a);
+grant select on sys.test_tab2 to dummy
+
+dummy:
+select * from ALL_VIEWS– доступные вьюшки
+select * from ALL_USERS– все пользователи
+select * from ALL_SYNONYMS – доступные сиснонимы
+select * from ALL_TABLES – доступные таблицы
+select * from ALL_SOURCE – PL/SQL код объектов
+select * from ALL_SEQUENCES – доступные оследовательности
+select * from ALL_DB_LINKS – доступные ДБ линки
+select * from ALL_TAB_COLUMNS where table_name = 'TEST_TAB2' – поля таблиц
+select * from ALL_IND_COLUMNS where table_name = 'TEST_TAB2' – индексированные поля таблиц
+select * from ALL_INDEXES where table_name = 'TEST_TAB2' – индексы 
+
+2.4 вариации синтаксиса оператора SELECT, псевдо столбцы///
+Вариации конструкций синтаксиса
+
+sys:
+grant all on sys.test_tab2 to dummy
+begin
+  for tm in (select 'GRANT SELECT ON '||OWNER||'.'||OBJECT_NAME||' TO DUMMY' s from all_objects where owner = 'HR' 
+  and OBJECT_TYPE = 'TABLE'
+  ) loop
+    execute immediate tm.s;
+  end loop;
+end;
+
+dummy:
+begin
+  insert into sys.test_tab2(a,b,c)values(1,trunc(sysdate) - 2, 'test1');
+  insert into sys.test_tab2(a,b,c)values(2,trunc(sysdate) - 1, 'test2');
+  insert into sys.test_tab2(a,b,c)values(3,trunc(sysdate) - 0, 'test3');
+  commit;
+end;
+
+1)select a.* from sys.test_tab2 a – выборка всех полей, применяется при полном соответствии набора полей требованиям к результату, в основном используется для ознакомления с таблицей. a – псевдоним таблицы
+
+2)select a.a as aa,a.b bb,a.c from sys.test_tab2 a – выборка определенных полей, в основном применяется в запросах с соединением данных 2 и более таблиц.  aa и bb псевдонимы полей
+
+3)select a.* from (select a.a,a.b,a.c from sys.test_tab2 a) a – выборка из вьюшки,
+в основном применяется при необходимости сделеть дополнительное преобразование данных из таблицы вьюшки
+
+4)with a as (select a.a,a.b,a.c from sys.test_tab2 a) select a.* from a – выборка из предопределенной вьюшки
+with ad as (select a.a,a.b,a.c from sys.test_tab2 a), 
+bd as (select ad.a, ad.b||ad.c n from ad)
+select ad.*, bd.n from ad, bd where ad.a = bd.a 
+позволяет  повторно использовать выбранные данные и совместно использовать, ad базовая вьюшка,
+bd получена из ad и соединяются для получения результата
+
+база oracle SE прод на который есть доступ:
+create table test_tab ( a number, b date, c varchar2(100))
+partition by range(b) SUBPARTITION BY HASH (a) SUBPARTITIONS 4
+(
+partition test_tab201710 values less than (to_date('20171101','YYYYMMDD')),
+partition test_tab201711 values less than (to_date('20171201','YYYYMMDD'))
+)
+begin
+  insert into test_tab(a,b,c)values(1,to_date('01102017','ddmmyyyy'), 'test1');
+  insert into test_tab(a,b,c)values(2,to_date('01112017','ddmmyyyy'), 'test2');
+  commit;
+end;
+
+5) select a.a,a.b,a.c from test_tab partition(test_tab201710) a  – выборка из предопределенной партиции, применяется редко, обычно партиция задается условием по партиционированным  полям
+drop table test_tab purge
+
+dummy:
+6) select a.a,a.b,a.c from sys.test_tab2  sample(50) a – выборка случайных данных в в указанном процентном соотношении от общего количества, в основном не применяется из - за случайности результата
+
+sys:
+alter table test_tab2 add p number
+update test_tab2 set p = a - 1;
+commit;
+
+dummy:
+
+7)select a.a,a.b,a.c,a.p from sys.test_tab2 a connect by a.p = PRIOR a.a START WITH a.a = 1 – выборка иерархических данных, применяется редко, используется в генерации данных 
+
+8)select a.a,a.b,a.c,a.p, rownum, rowid, sysdate from sys.test_tab2 a – выборка полей с вычисляемыми полями и псевдостолбцами , применяется часто
+rownum – порядковый номер строки, вычисляемое поле
+rowid – уникальный адресс для прямого доступа к строке
+sysdate – возвращающая системную дату , вычисляемое поле 
+
+select a.a,a.b,a.c,a.p, rownum, rowid, sysdate 
+from sys.test_tab2 a where rowid = 'AAAE7/AABAAAK+hAAB'
+позволяет выполнить быстрый доступ к данным таблицы, даже если отсутствуют индексы,
+можно использовать для исключения дубликатов 
+
+9)select a.a,a.b,a.c,a.p from sys.test_tab2 a
+union all select a.a,a.b,a.c,a.p from sys.test_tab2 a–объединение записей однообразных данных из разных источников, применяется часто
+
+10)select distinct a.a,a.b,a.c,a.p from sys.test_tab2 a – выборка строк с исключением дубликатов , применяется редко, лучше использовать группировки
+
+перечисленные вариации конструкций синтаксиса могут быть использованы совместно.
+
+with ad as (select a.a,a.b,a.c from sys.test_tab2 a), 
+  bd as (select ad.a, ad.b||ad.c n from ad)
+--
+select distinct ad.*, bd.n, rownum rn, ad.rowid as rw from ad, bd where ad.a = bd.a 
+  union all
+select a.*, rownum rn, rowid rw from (select a.a,a.b,a.c,to_char(a.p) from sys.test_tab2 a) a
+
+особенность применения конструкций UNION,ALL,MINUS,INTERSECT:
+
+применение приводит к группировке данных, добавляем дубликатов 
+begin
+  insert into sys.test_tab2(a,b,c)values(5,trunc(sysdate) - 1, 'test1');
+  insert into sys.test_tab2(a,b,c)values(5,trunc(sysdate) - 1, 'test1');
+  insert into sys.test_tab2(a,b,c)values(5,trunc(sysdate) - 1, 'test1');
+  commit;
+end; 
+
+UNION ALL -  объединение данных без преобразования 
+select a.a,a.b,a.c,a.p from sys.test_tab2 a
+union all
+select a.a,a.b,a.c,a.p from sys.test_tab2 a where a.a = 1
+
+select a.a,a.b,a.c,a.p from sys.test_tab2 a
+union all
+select a.a,a.b,a.c,a.p from sys.test_tab2 a where a.a = 0
+
+UNION -  объединение с преобразованием, приводит к групировке результатов 1 и 2 набора данных и и добавлению в 1 набор отсутствующих записей из 2 набора
+select a.a,a.b,a.c,a.p from sys.test_tab2 a where a.a != 1
+union
+select a.a,a.b,a.c,a.p from sys.test_tab2 a where a.a = 1
+
+приведет к группировке данных 1 набора данных
+select a.a,a.b,a.c,a.p from sys.test_tab2 a
+union
+select a.a,a.b,a.c,a.p from sys.test_tab2 a where a.a = 0
+
+MINUS -  исключение с преобразованием, приводит к групировке результатов 1 и 2 набора данных и
+исключению из набора 1 совпадений с набором 2
+select a.a,a.b,a.c,a.p from sys.test_tab2 a
+MINUS
+select a.a,a.b,a.c,a.p from sys.test_tab2 a where a.a = 1
+
+select a.a,a.b,a.c,a.p from sys.test_tab2 a
+MINUS
+select a.a,a.b,a.c,a.p from sys.test_tab2 a where a = 7
+
+INTERSECT -  пересечение с преобразованием, приводит к групировке результатов 1 и 2 набора данных и отображению из набора 1 совпадений с набором 2
+select a.a,a.b,a.c,a.p from sys.test_tab2 a
+INTERSECT
+select a.a,a.b,a.c,a.p from sys.test_tab2 a where a.a = 1
+
+select a.a,a.b,a.c,a.p from sys.test_tab2 a
+INTERSECT
+select a.a,a.b,a.c,a.p from sys.test_tab2 a
+
+если при получении данных дублирующие значения должны оставаться нельзя использовать
+UNION, MINUS, INTERSECT
+нужно использовать UNION ALL, используется чаще всего
+
+3.1 типы данных(char, varchar2, date, number, timestamp)///
+часто применяемые типы данных
+char(n) – текстовое значение определенной размерности
+varchar2(m) - текстовое значение переменной размерности
+date  - дата, с минимальным значением в секунду
+number - число
+timestamp – дата с минимальным значением в доли секунды
+
+sys:
+alter table test_tab2 add c_char char(20)
+alter table test_tab2 add c_varchar2 varchar2(200)
+alter table test_tab2 add c_timestamp timestamp
+
+dummy:
+
+добавляем данные
+begin
+  insert into sys.test_tab2(a,b,c,c_char,c_varchar2,c_timestamp)
+    values(5,trunc(sysdate) - 1, 'test1', '123','123',systimestamp);
+  insert into sys.test_tab2(a,b,c,c_char,c_varchar2,c_timestamp)
+    values(5,trunc(sysdate) - 1, 'test1', '123','123',systimestamp);
+  insert into sys.test_tab2(a,b,c,c_char,c_varchar2,c_timestamp)
+    values(5,trunc(sysdate) - 1, 'test1', '123','123',systimestamp);
+  commit;
+end;
+
+поле char(n) значение дополняется пробелами до достижения размарности в n символов
+select a.* from sys.test_tab2 a
+select a.* from sys.test_tab2 a where a.c_char = '123'
+select * from (select a.*, a.c_char||'1' nk from sys.test_tab2 a) where nk = '1231'
+select * from (select a.*, a.C_VARCHAR2||'1' nk from sys.test_tab2 a) where nk = '1231'
+
+date + number = new date, 1 = 1 день, 1/24 = 1 час, 1/24/60 = 1 минута, 1/24/60/60 = 1 секунда
+select sysdate, sysdate + 1, sysdate + 1/24, sysdate + 1/24/60, sysdate + 1/24/60/60 from dual
+
+date – date = number- временной период между датами, 1 = 1 день, 1/24 = 1 час, 1/24/60 = 1 минута, 1/24/60/60 = 1 секунда
+select sysdate FD, trunc(sysdate - 1) LD, sysdate - trunc(sysdate - 1) period, trunc(sysdate - trunc(sysdate - 1)) DD, 
+trunc(mod((sysdate - trunc(sysdate - 1)),1) * 24) HH, trunc(mod((sysdate - trunc(sysdate - 1))*24,1) * 60) MI, 
+round(mod((sysdate - trunc(sysdate - 1))*24*60, 1) * 60) SS 
+from dual
+timestamp  + number = date , происходит неявное преобразование,  функция systimestamp
+возвращает тип данных timestamp with timezone 
+select systimestamp, systimestamp + 1, systimestamp + interval '1' DAY inter_DAY, 
+EXTRACT(HOUR FROM systimestamp - TRUNC(systimestamp)) hh,EXTRACT(minute FROM systimestamp - TRUNC(systimestamp)) MI,
+EXTRACT(SECOND FROM systimestamp - TRUNC(systimestamp)) SS from dual
+
+timestamp  + interval = timestamp
+select systimestamp, systimestamp + interval '1.005' second inter_second,
+systimestamp + interval '1:00.005' Minute TO second inter_Minute,
+systimestamp + interval '1:00:00.005' hour TO second inter_hour,  
+systimestamp + interval '1 00:00:00.005' DAY TO second inter_DAY, 
+EXTRACT(HOUR FROM systimestamp + interval '1.005' second) HH, 
+EXTRACT(HOUR FROM cast(systimestamp + interval '1.005' second as timestamp)) HH2,EXTRACT(DAY FROM sysdate ) DD
+from dual
+
+timestamp  - timestamp = timestamp
+timestamp  - date = timestamp
+select systimestamp, TRUNC(systimestamp), systimestamp - TRUNC(systimestamp),
+systimestamp - TRUNC(sysdate), systimestamp - to_timestamp('20171124000000000','YYYYMMDDHH24MISSFF3'),
+EXTRACT(HOUR FROM systimestamp - TRUNC(systimestamp)) hh
+from dual
+
+3.2 значение null
+null – по умолчанию пустое строковое значение, соответствует неопределенности.
+действует правило любая операция с null приведет к null результату, кроме объединения строк (конкатенации) 
+select null||'123', null + 123, case when null = null then '123' end from dual
+select instr('123',null,1), instr('123','',1), instr('123','2',1), CONCAT('123',null) end from dual
+для работы с null значением используют функции IS NULL, COALESCE, NVL
+select case when null IS NULL then '123' end, COALESCE(NULL,123), NVL(NULL,123) from dual
+IS NULL применяется в условных блоках, вычисляемых полей и условия выборки
+COALESCE вычисляет условие подстановки только при  null значении базового условия
+NVL вычисляет условие подстановки при любом значении базового условия
+with a as (select null n, 1 m from dual union all select 2 n, 3 m from dual)
+select n + m, coalesce(n,0) + coalesce(m,0), nvl(n,0) + nvl(m,0) from a
+
+3.3 преобразование данных
+Преобразование явное – в запросе используются операторы, приводящие к требуемому типу данных
+select 1 + to_number('2') from dual
+Преобразование не явное – ORACLE при выполнении приводит к требуемому типу данных поля согласно используемомй логики
+select 1 + '2' from dual
+
+некоторые функции преобразования 
+to_char() – преобразует к строковому значению дату и число, возможно форматирование
+select to_char(sysdate), to_char(sysdate,'dd.mm.yyyy hh24:mi:ss'), 
+to_char(-123.125), to_char(-123.125, '9,99.99MI'), to_char(-123.125, '999.99') from dual
+
+to_number() – преобразует к числовому значению строку, возможно указание формата строки, если оно не совпадает со значением по умолчанию 
+select to_number('-123.125'), to_number('1,23.13-','9,99.99MI') from dual
+
+to_date()– преобразует к дате значение строки, возможно указание формата строки, если оно не совпадает со значением по умолчанию 
+select to_date('24-NOV-17'), to_date('24.11.2017 18:59:29','dd.mm.yyyy hh24:mi:ss') from dual
+
+to_timestamp() - преобразует к timestamp значение строки, возможно указание формата строки, если оно не совпадает со значением по умолчанию 
+select to_timestamp('24-NOV-17'), to_timestamp('20171124010203123','YYYYMMDDHH24MISSFF3') from dual
+
+cast()  - преобразует тип данных с указанием размерности, согласно совместимости преобразования,
+в основном используется  в запросах, где размерность возвращаемых полей должна быть предопределена, используется для приведения null значения к требуему типу данных(ddl скрипты с использованием select). использует формат преобразования по умолчанию
+select cast(123 as varchar2(10)), cast('123' as number(3)), cast('24-NOV-17' as date), 
+cast(null as number), cast(null as date), cast(null as timestamp), cast(null as varchar2(20)) from dual
+
+select cast('24-NOV-17' as date) from dual
+select cast('24.11.2017' as date) from dual
+alter session set nls_date_format='dd.mm.yyyy'
+select cast('24.11.2017' as date), cast('24-NOV-17' as date) from dual
+
+Преобразование не явное, опасно появлением скрытой ошибки
+данные не приводят к ошибке, происходит преобразование значения n таблицы a в число
+with a as (select '12' n from dual union all select '123' n from dual union all select '323' n from dual),
+b as (select 123 m from dual )
+select * from a, b where a.n = b.m
+данные приводят к ошибке
+with a as (select '_12' n from dual union all select '123' n from dual union all select '323' n from dual),
+b as (select 123 m from dual )
+select * from a, b where a.n = b.m
+применено явное преобразование, происходит преобразование значения m таблицы b в строку 
+with a as (select '_12' n from dual union all select '123' n from dual union all select '323' n from dual),
+b as (select 123 m from dual )
+select * from a, b where a.n = to_char(b.m)
+
+при применении функций необходимо учитывать тип входящего параметра, при не совпадении используемого с  требуемым, происходит неявное преобразование, что может привести к логической ошибке
+
+with a as (select to_date('01.01.2017 02','dd.mm.yyyy hh24') n, 1 m from dual
+union all select to_date('01.01.2017 03','dd.mm.yyyy hh24') n, 2 m from dual
+union all select to_date('01.01.2017 04','dd.mm.yyyy hh24') n, 3 m from dual
+), b as (select to_date('01.01.2017 01','dd.mm.yyyy hh24') f,
+to_date('01.01.2017 05','dd.mm.yyyy hh24') l from dual)
+select * from a,b where to_date(a.n) between b.f and b.l
+
+использование оператора to_date приводит к неявному преобразованию даты в текст
+по формату по умолчанию и следующему явному преобразованию текста в дату, что приводит при стандартных настройках к потере временных данных 
+ 
+with a as (select to_date('01.01.2017 02','dd.mm.yyyy hh24') n, 1 m from dual
+union all select to_date('01.01.2017 03','dd.mm.yyyy hh24') n, 2 m from dual
+union all select to_date('01.01.2017 04','dd.mm.yyyy hh24') n, 3 m from dual
+), b as (select to_date('01.01.2017 01','dd.mm.yyyy hh24') f,
+to_date('01.01.2017 05','dd.mm.yyyy hh24') l from dual)
+select * from a,b where a.n between b.f and b.l
+
+
+3.4 блок where, построение условий выборки
+
+Конструкция where ORACLE определяет логику соединения таблиц и логику фильтра данных. Операторы можно разделить условно на 2 группы. Логические и условные, условные это функции с входными параметрами различных типов данных возвращающие логический результат true(истина)  и false(ложь), логические операторы выполняют  объединение логических результатов, задают порядок выполнения. Запись запроса выдается если логическое значение конструкции where равно true. Некоторые из них:
+
+при соединении таблиц по полям используют оператор  = для полей соединения 
+with a as (select 1 n from dual union all select 2 n from dual union all select 3 n from dual),
+b as (select 3 n from dual union all select 4 n from dual)
+select * from a, b where a.n = b.n 
+в результат попадут только записи для которых есть соответствие в указанных таблицах(записи которые есть в одной но отсутствуют в другой не попадают), это внутреннее соединение(inner join) 
+
+если при выборке данных возможно отсутствие записей в одной из таблиц и при этом все записи другой таблицы должны отображаться, применяется внешнее соединение(outer join),таблица записи которой должны отображаться это главная таблица, в условии соединения со стороны дополнительной таблицы добавляется (+)
+with a as (select 1 n from dual union all select 2 n from dual union all select 3 n from dual),
+b as (select 3 n from dual union all select 4 n from dual)
+select * from a, b where a.n = b.n(+) 
+
+with a as (select 1 n from dual union all select 2 n from dual union all select 3 n from dual),
+b as (select 3 n from dual union all select 4 n from dual)
+select * from a, b where a.n(+) = b.n 
+
+(+)  устанавливается и для  условий фильтра использующие константные значения, при наличии хотябы 1 внутреннего соединения все внешние игнорируются
+with a as (select 1 n from dual union all select 2 n from dual union all select 3 n from dual),
+b as (select 3 n from dual union all select 4 n from dual)
+select * from a, b where a.n = b.n(+) and b.n(+) = 3 
+
+with a as (select 1 n from dual union all select 2 n from dual union all select 3 n from dual),
+b as (select 3 n from dual union all select 4 n from dual)
+select * from a, b where a.n = b.n(+) and b.n = 3 
+
+внешнее соединение можно использовать для выбора записей отсутствующих в дополнительной таблице, с использованием условия фильтрации исключение записей дополнительной таблицы с null значением поля соединения
+with a as (select 1 n from dual union all select 2 n from dual union all select 3 n from dual),
+b as (select 3 n from dual union all select 4 n from dual)
+select * from a, b where a.n = b.n(+) and b.n is null
+
+логические операторы:
+AND,OR, NOT,()
+AND –логическое умножение, эквивалент умножению булевой логики
+false AND false = false
+with a as (select 1 n from dual) select * from a where 1 = 2 and 1 = 2
+false AND true = false
+with a as (select 1 n from dual) select * from a where 1 = 2 and 1 = 1
+true AND false = false
+with a as (select 1 n from dual) select * from a where 1 = 1 and 1 = 2
+true AND true = true
+with a as (select 1 n from dual) select * from a where 1 = 1 and 1 = 1
+
+OR –логическое сложение, эквивалент сложению булевой логики
+false OR false = false
+with a as (select 1 n from dual) select * from a where 1 = 2 or 1 = 2
+false OR true = true
+with a as (select 1 n from dual) select * from a where 1 = 2 or 1 = 1
+true OR false = true
+with a as (select 1 n from dual) select * from a where 1 = 1 or 1 = 2
+true OR true = true
+with a as (select 1 n from dual) select * from a where 1 = 1 or 1 = 1
+
+AND имеет при выполнении больший приоритет чем OR
+with a as (select 1 n from dual) select * from a where 1 = 1 or 1 = 1 and 1 = 2
+with a as (select 1 n from dual) select * from a where 1 = 2 or 1 = 1 and 1 = 1
+with a as (select 1 n from dual) select * from a where 1 = 2 or 1 = 1 and 1 = 2
+
+NOT – логическая инверсия , имеет больший приоритет чем AND и OR 
+
+with a as (select 1 n from dual) select * from a where not 1 = 1 or 1 = 1 and 1 = 2
+with a as (select 1 n from dual) select * from a where 1 = 2 or not 1 = 1 and 1 = 1
+with a as (select 1 n from dual) select * from a where 1 = 2 or 1 = 1 and not 1 = 2
+
+() позволяют разделять логические выражения на уровни, операторы расположенные в уровне с большей вложенностью выполняются в первую очередь, что используется для задания приоритета 
+with a as (select 1 n from dual) select * from a where not ((1 = 1 or 1 = 1) and 1 = 2)
+with a as (select 1 n from dual) select * from a where 1 = 2 or not 1 = 1 and 1 = 1
+with a as (select 1 n from dual) select * from a where 1 = 2 or 1 = 1 and not 1 = 2
+
+при попадании неопределенности (любая операция с null операторами не предназначенными для обработки null) в выражение приведет к неопределннности выражения что приведет к исключению записей из выборки, неопределенность не эквивалентна ни true ни false за исключением логического сложения  
+
+false and null = null
+true and null = null
+false or null = false
+true or null = true
+
+with a as (select 1 n from dual) select * from a where 1 = 1 or 1 = null
+with a as (select 1 n from dual) select * from a where not (1 = null)
+with a as (select 1 n from dual) select * from a where 1 = null
+with a as (select 1 n from dual) select * from a where not (1 = 1 and 1 = null)
+with a as (select 1 n from dual) select * from a where not (1 = 2 or 1 = null)
+with a as (select 1 n from dual) select * from a where not (1 = 2 and 1 = null)
+
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where n > 0 and m != 3
+
+при возможности попадания null в выражение необходимо явно обрабатывать данную ситуацию  
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where n > 0 and (m != 3 or m is null)
+
+with a as (select 1 n from dual), 
+b as (select rownum n from dual connect by rownum < 4) 
+select b.* from a, b 
+where not (a.n = b.n)
+--
+with a as (select 1 n from dual), 
+b as (select rownum n from dual connect by rownum < 4) 
+select b.* from a, b 
+where a.n(+) = b.n and a.n is null
+
+
+условные:
+IN () –возвращает true при нахождении значения аргумента в списке
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where n in (1,2,3,4,5) 
+
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where n in (select n from a) 
+
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where (n,m) in ((1,1),(2,2),(3,3),(4,5)) 
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where (n,m) in (select n,m from a) 
+
+in () соответствует конструкции and(… or … or … or … or ...) при наличии null значения в списке
+и инверсии результата and not in  (… or … or … or … or null) эквивалентно конструкции 
+and (not … and not … and not … and null) результат которой null неопределенность и данные не возвращаются
+
+not(false and null) = not false or not null = true or null = true
+not(true or null) = not true and not null = false and null = null
+not(false or null) = not false and not null = true and null = null
+not(true and null) = not true or not null = false or null = false
+ 
+select 1 from dual where not (1 = 2 and 1= null)
+select 1 from dual where (not 1 = 2 or not 1 = null)
+select 1 from dual where 1 = 1 or 1= null
+select 1 from dual where 1 = 1 
+
+select 1 from dual where not (1 = 1 or 1= null)
+select 1 from dual where not (1 = 2 or 1= null)
+select 1 from dual where not (1 = 1 and 1= null)
+
+пример запросов
+
+with a as (select null a from dual union all select 1 from dual
+union all select 3 from dual union all select 4 from dual),
+b as (select null n from dual)
+select a.* from a, b where not(a.a = b.n and a.a < 0)
+
+with a as (select null a from dual union all select 1 from dual
+union all select 3 from dual union all select 4 from dual),
+b as (select null n from dual)
+select a.* from a, b where (a.a = b.n or a.a > 0)
+
+может привести  логической ошибке запроса вида 
+
+with a as (select null a from dual union all select 1 from dual
+       union all select 3 from dual union all select 4 from dual),
+     b as (select 1 n from dual union all select 2 from dual
+       union all select 5 from dual)
+select * from b where n not in (select a from a)
+
+которая корректируется добавлением проверки на null значения
+
+with a as (select null a from dual union all select 1 from dual
+       union all select 3 from dual union all select 4 from dual),
+     b as (select 1 n from dual union all select 2 from dual
+       union all select 5 from dual)
+select * from b where n not in (select a from a where a.a is not null)
+
+IS NULL - возвращает true если аргумент равен null
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where m is null 
+
+IS NOT NULL - возвращает true если аргумент не null
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where m is not null 
+
+LIKE  - возвращает true если аргумент соответствует маске
+with a as (select 1 n, '1_abc_1' m from dual union all select 2 n, '2_abc1' m from dual 
+union all select 3 n, '_abc_1' m from dual union all select 4 n, null m from dual)
+select * from a where m like '_abc/_%' escape '/' 
+ элементы маски:
+% - любой набор символов
+_ - любой 1 символ
+escape '/' – задает символ исключения для возможности поиска по символам маски 
+
+BETWEEN AND - возвращает true если аргумент попадает в заданный диапазон
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where m between 1 and 3 
+эквивалентен выражению >= AND <=
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where m >= 1 and m <=3 
+
+!=,<> - возвращает true при не равенстве аргументов 
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where m <> 2  
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where m != 2  
+
+>= - возвращает true если первый аргумент больше или равен второму
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where m >= 2  
+
+> - возвращает true если первый аргумент больше второго
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where m > 2  
+
+<= - возвращает true если первый аргумент меньше или равен второму
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where m <= 3  
+
+< - возвращает true если первый аргумент меньше второго
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual)
+select * from a where m < 3  
+
+для строковых значений, при сравнении значение строки определяется  числовым ascii кодом, приоритет значений уменьшается от первого символа к последующим 
+with a as (select 1 n, '14' m from dual union all select 2 n, '2' m from dual 
+union all select 3 n, '39' m from dual union all select 4 n, null m from dual)
+select a.*, ascii(substr(m,1,1)), ascii('A') from a where m < 'A'  
+
+внешние соединения можно указывать последовательно 
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual 
+union all select 3 n, 3 m from dual union all select 4 n, null m from dual),
+b as (select * from a where n != 2),
+c as (select * from a where n != 3)
+select * from a,b,c
+where a.n = b.n(+) and b.n = c.n(+)
+
+4.1 вычисляемые поля
+
+Поля, которые отсутствуют в таблицах запроса, но созданы при помощи констант, функций, преобразований значений полей таблиц  являются вычисляемыми. Действует ограничение по максимальному количеству полей в результате запроса в 1000 полей. Для каждого поля действует ограничение в размере связанное с типом данных, для varchar2 это 4000 байт, для UNICODE (2 байтные символы) в поле можно вывести максимум 2000 символов. Вычисляемым полям необходимо назначать псевданим для возможности обращения к нему в запросе.  
+
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual)
+select n, dt, nv from (select a.*, sysdate dt, 'n :'||n as nv from a)
+
+4.2 некоторые встроенные функции ORACLE
+текстовые функции: 
+|| - объединяет строки, строковые константы задаются вертикальными опострафами, для включения опострафа в текст нужно включать его дважды
+instr(в чем, что, с какой позиции, какое совпадение) – поиск позиции заданного текста в строке
+substr(в чем, с какой позиции, сколько) – извлечение заданного количества символов из строки
+substr(в чем,с  какой позиции)  - извлечение всех символов из строки, отрицательное значение задает смещение с конца строки, при превышении размерности возаращает null
+with a as (select q'< abc1 def2 ''>'||'''abc3'' def4 ' a from dual union all select ' abb1 def2 '||null||'abb3 def4 ' a from dual)
+select a, instr(a,'b',1,1) f_in1, instr(a,'b',1,2) f_in2, instr(a,'bb',1,2) f_in3, 
+instr(a,'',1,2) f_in4, instr(a,null,1,2) f_in5, substr(a,1,3) f_sb1, substr(a,1,11) f_sb2,
+substr(a,5) f_sb3, substr(a,-5) f_sb4, substr(a,-50) f_sb5, substr(a,1,50) f_sb1 from a
+
+--select 'COUNT USER: '||count(*) from all_users
+declare
+  r varchar2(50);
+begin
+  --execute immediate 'select ''COUNT USER: ''||count(*)  from all_users' into r;
+  execute immediate q'<select 'COUNT USER: '||count(*) from all_users>' into r;
+  dbms_output.put_line(r);
+end;
+
+trim(в чем) –убирает пробелы по краям текста
+TRIM(LEADING, TRAILING, BOTH что FROM в чем ) – убирает заданный символ из строки с указанной позиции
+with a as (select '111222333444555777' a from dual union all select '111222333444555111' a from dual)
+select a, trim(LEADING '1' from a), trim(TRAILING '7' from a), trim(BOTH '1' from a) from a
+
+length(в чем) – определяет количество символов текста
+chr(число) – возращает символ по числовому ASCII коду
+ascii(символ) - возращает числовой ASII код символа
+with a as (select ' abc1 def2 '||'abc3 def4 ' a from dual union all select ' abb1 def2 '||null||'abb3 def4 ' a from dual)
+select a, trim(a) aa, length(a) ab, length(trim(a)) ac, trim(trim(a)||chr(10)||chr(13)) ad, 
+length(trim(a)||chr(10)||chr(13)) ae, chr(10) af, ascii(chr(10)) aj from a
+не печатаемый символ не заметен на фоне строки, но при выгрузке в текстовый файл может повлиять на отображение данных, в данном случае 10 и 13 это символы переноса строки и перевода на начало строки 
+
+replace(в чем, что, на что) –заменяет в строке все указанные подстроки на заданную
+reverse(что) разворачивает символы
+with a as (select ' abc1 def2 '||chr(10)||'abc3 def4 ' a from dual union all select ' abb1 def2 '||null||'abb3 def4 ' a from dual)
+select a, replace(a,'a','q') ab, replace(a,'ab','qqq') ac, reverse(replace(a,'ab','qqq')) ad from a
+фунцию replace() используют для исключения не печатаемых символов(управляющие символы)  в выгрузках данных для устранения нарушения структуры результата
+with a as (select ' abc1 def2 '||chr(10)||'abc3 def4 ' a from dual union all select ' abb1 def2 '||null||'abb3 def4 ' a from dual)
+select replace(a,chr(10),'') a, replace(replace(a,'a','q'),chr(10),'') ab, 
+replace(replace(a,'ab','qqq'),chr(10),'') ac, reverse(replace(replace(a,'ab','qqq'),chr(10),'')) ad from a
+
+ltrim(в чем, что) –слева убирает из строки все символы указанные в шаблоне до первого не совпадения 
+rtrim(в чем, что) –справа убирает из строки все символы указанные в шаблоне до первого не совпадения 
+upper(что) – переводит все символы в верхний регистр
+lower(что) – переводит все символы в нижний регистр
+rpad(что, дочего, чем) – дополнить справа строку до заданной размерности заданной строкой
+lpad(что, дочего, чем)– дополнить слева строку до заданной размерности заданной строкой
+with a as (select ' abc1 def2 '||chr(10)||'Abc3 def4 ' a from dual 
+union all select ' abb1 def2 '||null||'abb3 def4 ' a from dual)
+select a, ltrim(a,' abc') ab, rtrim(a,' 4def') ac, upper(a) ad, lower(a) ae, ascii(a) af, 
+rpad(a,30,'S') aj, lpad(a,30,'SA') ak from a
+
+числовые функции
+
++,-,*,/ арифметические операции  
+mod(a,b) – остаток целочисленного деления a на b
+round(a,b) – математическое округление a до разряда b после запятой 
+trunc(a,b) – убирает дробную часть после разряда b после запятой
+ceil(a) – ближайшее целое >= a
+floor(a) - ближайшее целое <= a
+abs(a) – модуль числа
+remainder(a) – остаток до ближайшего округленного целочисленного деления
+select 10 + 3 a, 10 - 3 ab, 10*3 ac, 10/3 ad, mod(10,3) ae, round(10/3) af, 11/3 aj, round(11/3,2) ak, 
+trunc(10/3) al, trunc(11/3) am, ceil(10/3) an, ceil(11/3) ao, floor(10/3) ap, floor(11/3) aq, abs(-3) ar, 
+abs(-3) au, trunc(11/3,2) av, remainder(10,3) ra, remainder(9,3) rb, remainder(11,3) rc  from dual
+
+функции даты и времени
+sysdate – системное время date
+localtimestamp - системное время timestamp
+systimestamp - системное время timestamp with timezone
+round(d,r) – округление математическое времени до указанного критерия
+trunc(d,r)– отсечение времени до указанного критерия
+last_day (d)-последний день месяца указанной даты 
+add_months(d,n) – добавление к d периода в n месяцев
+select sysdate, localtimestamp, systimestamp, 
+round(sysdate,'mi'),round(sysdate,'hh'),round(sysdate,'dd'),round(sysdate,'mm'),round(sysdate,'yyyy'),
+trunc(sysdate,'mi'),trunc(sysdate,'hh'),trunc(sysdate,'dd'),trunc(sysdate,'mm'),trunc(sysdate,'yyyy'),
+round(to_date('01.01.2017 01:01:01','dd.mm.yyyy hh24:mi:ss'),'mi'),
+round(to_date('01.01.2017 01:01:31','dd.mm.yyyy hh24:mi:ss'),'mi'),
+last_day(sysdate), add_months(sysdate,1) from dual
+
+interval – для задания временных интервалов 
+select systimestamp, systimestamp + interval '1.005' second inter_second,
+systimestamp + interval '1:00.005' Minute TO second inter_Minute,
+systimestamp + interval '1:00:00.005' hour TO second inter_hour,  
+systimestamp + interval '1 00:00:00.005' DAY TO second inter_DAY, 
+EXTRACT(HOUR FROM systimestamp + interval '1.005' second) HH, 
+EXTRACT(HOUR FROM cast(systimestamp + interval '1.005' second as timestamp)) HH2,EXTRACT(DAY FROM sysdate ) DD
+from dual
+
+дополнительные фyнкции
+nullif(a,b) – возвращает null если a = b иначе a
+greatest(a,...,n) - возвращает наибольшее значение из столбцов a,..,n при попадании null возвращает null
+least() - возвращает наименьшее значение из столбцов a,..,n при попадании null возвращает null
+decode(a,c1,r1,..,cn,rn, def) – для a если определено соответствие cm то возвращается rm, если не найдено соответствие возвращается def, данный оператор лучше заменять на конструкцию на CASE
+nvl2(a,n1,n2)- если a null возвращается n2 иначе n1
+with n as (select 1 a, 2 b, 3 c, cast(null as number) d from dual union all
+select 1 a, 2 b, 1 c, 4 d from dual) 
+select n.*, nullif(a,c), greatest(a,b,c,d), least(a,b,c,d), 
+decode(c,1,'=1','<>1'), nvl2(d,'not null','null') from n
+
+поля внешнего соединения в функциях 
+with a as (select rownum n from dual connect by rownum < 5),
+ b as (select rownum n from dual connect by rownum < 10)
+select b.*, a.* from a,b
+where a.n(+) = b.n
+and not(coalesce(a.n,0) = b.n)
+--
+with a as (select rownum n from dual connect by rownum < 5),
+ b as (select rownum n from dual connect by rownum < 10)
+select b.*, a.* from a,b
+where a.n(+) = b.n
+and not(a.n = b.n)
+--
+with a as (select rownum n from dual connect by rownum < 5),
+ b as (select rownum n from dual connect by rownum < 10)
+select b.*, a.* from a,b
+where a.n(+) = b.n
+and coalesce(a.n,0) = b.n
+--
+with a as (select rownum n from dual connect by rownum < 5),
+ b as (select rownum n from dual connect by rownum < 10)
+select b.*, a.* from a,b
+where a.n(+) = b.n
+and not(coalesce(a.n(+),0) = b.n)
+--
+with a as (select rownum n from dual connect by rownum < 5),
+ b as (select rownum n from dual connect by rownum < 10)
+select b.*, a.* from a,b
+where a.n(+) = b.n
+and coalesce(a.n(+),0) = b.n
+--
+
+4.3 условный выбор CASE, greatest, least, coalesce, nvl, decode
+При необходимости использовать многовариантную логику от значений строки для вычисляемого поля, применяется условный выбор. 
+Сценарий выбор наименьшего или наибольшего значения из группы полей реализуется операторами least и greatest.
+например: каждый день фиксируется количество побывавших в 4 залах посетителей, своя ячейка для зала, определить максимальное и минимальное количество посетителей и номер соответствующего зала 
+with a as (select 11 n1, 5 n2, 4 n3, 17 n4 from dual)
+select n1,n2,n3,n4, 
+least(n1,n2,n3,n4) n_min, greatest(n1,n2,n3,n4) n_max,
+nvl2(nullif(least(n1,n2,n3,n4),n1),
+  nvl2(nullif(least(n1,n2,n3,n4),n2),
+    nvl2(nullif(least(n1,n2,n3,n4),n3),
+    'n4' 
+    ,'n3')
+  ,'n2')
+,'n1') nn_min,
+nvl2(nullif(greatest(n1,n2,n3,n4),n1),
+  nvl2(nullif(greatest(n1,n2,n3,n4),n2),
+    nvl2(nullif(greatest(n1,n2,n3,n4),n3),
+    'n4' 
+    ,'n3')
+  ,'n2')
+,'n1') nn_max
+from a
+
+Сценарий подстановки значения из одной дополнительной таблицы при отсутствии данных в основной таблице  реализуется операторами coalesce, nvl
+например: 
+все события фиксируются в основной таблице, дополнительные свойства сохраняются в дополнительной таблице, при выводе приоритет у доп. свойств, при их отсутствии  выводятся данные из основной таблицы
+
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual union all select 3 n, 3 m from dual
+union all select 4 n, 4 m from dual union all select 5 n, 5 m from dual union all select 6 n, 6 m from dual),
+b as (select 1 n, 22 m from dual union all select 3 n, 33 m from dual union all select 6 n, 66 m from dual)
+select a.n, coalesce(b.m,a.m) m
+from a,b where a.n = b.n(+) order by 1
+
+Сценарий подстановки  из множества таблиц с множественным условием реализуется оператором 
+CASE WHERE логическое условие1  THEN выражение1
+WHERE логическое условие2 THEN выражение2
+...
+WHERE логическое условиеN THEN выражениеN
+ELSE выражение END 
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual union all select 3 n, 3 m from dual
+union all select 4 n, 4 m from dual union all select 5 n, 5 m from dual union all select 6 n, 6 m from dual),
+b as (select 1 n, 11 m from dual union all select 2 n, 22 m from dual 
+union all select 4 n, 44 m from dual union all select 5 n, 55 m from dual ),
+c as (select 2 n, 222 m from dual union all select 3 n, 333 m from dual
+union all select 4 n, 444 m from dual union all select 6 n, 666 m from dual)
+select a.*, b.*, c.*,
+case when b.m is null and mod(c.m,2) = 0 then a.n * 2
+when b.m is null and mod(c.m,2) != 0 then a.n * 3
+when c.m is null and mod(b.m,2) = 0 then a.n * 4
+when c.m is null and mod(b.m,2) <> 0 then a.n * 5
+else a.n end res
+from a,b,c
+where a.n = b.n(+) and a.n = c.n(+) 
+
+при выполнении CASE возвращается результат первого сработавшего условия, поэтому при пересечении условий вначале оператора  располагают максимально сложные сценарии, уникальные выборки, ошибочный порядок условий:
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual union all select 3 n, 3 m from dual
+union all select 4 n, 4 m from dual union all select 5 n, 5 m from dual union all select 6 n, 6 m from dual)
+select a.*,
+case when mod(n,2) = 0 then 'четное'
+ when mod(n,2) <> 0 then 'не четное'
+ when mod(n,2) = 0 and n > 3 then 'четное > 3'
+ when mod(n,2) <> 0 and n > 3 then 'не четное > 3'
+ when n = 3 then '3'
+ else to_char(n) end
+from a
+
+правильный порядок условий:
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual union all select 3 n, 3 m from dual
+union all select 4 n, 4 m from dual union all select 5 n, 5 m from dual union all select 6 n, 6 m from dual)
+select a.*,
+case when n = 3 then '3'
+ when mod(n,2) = 0 and n > 3 then 'четное > 3'
+ when mod(n,2) = 0 then 'четное'
+ when mod(n,2) <> 0 and n > 3 then 'не четное > 3'
+ when mod(n,2) <> 0 then 'не четное'
+ else to_char(n) end
+from a
+4.4 собственные функции пользователя
+
+В запросах можно использовать собственные функции, но действует ограничение, функции не должны менять таблицы и объекты БД, допускается чтение таблиц, но не желательно, в основном используются для реализации сложной логики преобразования данных, трудно реализуемой на SQL 
+
+sys:
+grant create procedure to dummy
+
+dummy:
+create or replace function my_concat(in_a varchar2, in_b varchar2) return varchar2 is
+begin
+  return in_a||in_b;
+end;
+
+select my_concat('123','456') my_fn from dual
+
+пример сложной логики:
+вычисление значения шестнадцатиричного числа в строковом виде
+create or replace FUNCTION hex2dec (hexnum IN CHAR) RETURN NUMBER IS
+  i                 NUMBER;
+  digits            NUMBER;
+  result            NUMBER := 0;
+  current_digit     CHAR(1);
+  current_digit_dec NUMBER;
+BEGIN
+  digits := LENGTH(hexnum);
+  FOR i IN 1..digits LOOP
+     current_digit := SUBSTR(hexnum, i, 1);
+     IF current_digit IN ('A','B','C','D','E','F') THEN
+        current_digit_dec := ASCII(current_digit) - ASCII('A') + 10;
+     ELSE
+        current_digit_dec := TO_NUMBER(current_digit);
+     END IF;
+     result := (result * 16) + current_digit_dec;
+  END LOOP;
+  RETURN result;
+END;
+
+select hex2dec('FF'), hex2dec('FFFF'), hex2dec('FFFFFF') from dual
+
+5.1 ANSI SQL
+ANSI формат отличается он нативного синтаксисом указания соединения таблиц, действует ограничение нельзя совмещать 2 синтаксиса в одном запросе/подзапросе. Конструкция соединений
+имеет вид:
+select * from tab0 join tab1 on tab0.k = tab1.k join ... where ...
+with a as (select 1 n from dual union all select 2 n from dual union all select 3 n from dual),
+b as (select * from a),
+c as (select * from b),
+d as (select * from c)
+select * from a join b on a.n = b.n
+join c on b.n = c.n
+join d on c.n = d.n 
+where a.n in (1,2,3)
+
+внешнее соединение задается конструкциями left join,  right join, full outer join, 
+left join – указывает что главная таблица находится слева а дополнительная справа
+with a as (select 1 n from dual union all select 2 n from dual union all select 3 n from dual),
+b as (select * from a where n != 1)
+select * from a left join b on a.n = b.n
+where a.n in (1,2,3)
+
+right join – указывает что главная таблица находится справа слева а дополнительная слева
+with a as (select 1 n from dual union all select 2 n from dual union all select 3 n from dual),
+b as (select * from a where n != 1)
+select * from b right join a on a.n = b.n
+where a.n in (1,2,3)
+
+full outer join – полное соединение таблиц
+with a as (select 1 n from dual union all select 2 n from dual union all select 3 n from dual),
+b as (select * from a where n != 1),
+c as (select * from a where n != 3)
+select * from b full outer join c on c.n = b.n
+
+ANSI и ORACLE синтаксис возможно применять в общем запросе, если они изолированы во въюшках/подзапросах. 
+
+5.2 применение ANSI и ORACLE синтаксиса
+Все логические сценарии объединения таблиц можно реализовать, используя как ANSI так и ORACLE синтаксис, есть случаи когда ANSI синтаксис проще ORACLE. ANSI синтаксис проще использовать для full outer join 
+with a as (select 1 n from dual union all select 2 n from dual union all select 3 n from dual),
+b as (select * from a where n != 1),
+c as (select * from a where n != 3)
+select * from b,c where c.n(+) = b.n
+union all
+select * from b,c where c.n = b.n(+) and b.n is null
+
+Для внешнего соединения более чем к одной таблице
+база логики на ORACLE выдает ошибку:
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual union all select 3 n, 3 m from dual),
+b as (select * from a where n != 1),
+c as (select * from a where n != 3)
+select * from a,b,c where a.n = b.n(+)
+and a.n = c.n(+) and b.m = c.m(+)
+
+реализация на ORACLE без ошибки:
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual union all select 3 n, 3 m from dual),
+b as (select * from a where n != 1),
+c as (select * from a where n != 3)
+select * from 
+(select a.n, a.m, b.n n2, b.m m2 from a,b where a.n = b.n(+)) aa, c
+where  aa.n = c.n(+) and aa.m2 = c.m(+)
+
+реализация на ANSI
+with a as (select 1 n, 1 m from dual union all select 2 n, 2 m from dual union all select 3 n, 3 m from dual),
+b as (select * from a where n != 1),
+c as (select * from a where n != 3)
+select * from a left join b on a.n = b.n 
+left join c on a.n = c.n and b.m = c.m
+
+5.3 псевдо данные для проверки правильности SQL запросов и генерации данных
+Логика может содержать различные сценарии, которые могут отсутствовать в данных рабочих таблиц  на текущий момент, либо в рабочих таблицах может быть большое количество данных, тестирование запроса данных в данных случаях на рабочих таблицах не эффективно и ресурсозатратно. Поэтому оптимально создать псевдо данные соответствующие по структуре рабочим таблицам с помощью SQL используя константы и функции преобразования, так не всегда есть права на создание таблиц. 
+select rownum n from dual connect by rownum <= 10
+select level n from dual connect by level <= 10
+select level n1, rownum n2 from dual connect by level <= 10
+
+with a as (select rownum n from dual connect by rownum <= 10)
+select a.*,
+case when n = 3 then '3'
+ when mod(n,2) = 0 and n > 3 then 'четное > 3'
+ when mod(n,2) = 0 then 'четное'
+ when mod(n,2) <> 0 and n > 3 then 'не четное > 3'
+ when mod(n,2) <> 0 then 'не четное'
+ else to_char(n) end
+from a
+
+Дополнительно бывают требования когда набор выводимой информации не зависит от исходных данных, например, количество событий в разрезе дней недели, не зависимо от того были ли события или нет каждый день недели должен быть отображен в результате. Применяется генерация данных.
+with a as (select to_date('30102017','ddmmyyyy') + rownum d, rownum n from dual connect by rownum  < 60 ),
+b as (select a.*, 1 + TRUNC (d)  - TRUNC (d, 'IW') nd from a where TRUNC (d)  - TRUNC (d, 'IW') not in (1,4)),
+c as (select rownum n from dual connect by level < 8)
+select c.n, TO_CHAR(TRUNC (sysdate, 'IW') - 1 + c.n, 'Day', 'NLS_DATE_LANGUAGE = Russian'), 
+coalesce(sum(case when b.nd is not null then 1 end),0), coalesce(sum(b.n),0) 
+from c, b where b.nd(+) = c.n group by c.n order by 1 nulls last
+
+
+Возможны случаи, когда в одной строке в поле или полях записана группа параметров, которые необходимо отобразить либо использовать в вычислениях независимо от других. Применяется генерация данных.
+with a as (select 1 r, 1 n1, 3 n2, 0 n3, 2 n4 from dual
+union all select 2 r, 7 n1, 6 n2, 3 n3, 1 n4 from dual
+union all select 3 r, 2 n1, 5 n2, 8 n3, 9 n4 from dual), 
+b as (select rownum n from dual connect by rownum < 5)
+select --a.*, b.*, 
+r, 'COLL'||b.n cn,
+case when b.n = 1 then n1
+when b.n = 2 then n2
+when b.n = 3 then n3
+when b.n = 4 then n4 end uv
+from a, b
+
+with a as (select 1 a, '1:1; 2:21; 1:3;' n from dual
+union all
+select 2 a, '1:11; 2:2; 1:3; 1:4; 2:5;' n from dual
+union all
+select  3 a, '1:1; 2:2; 1:3; 1:41; 1:5; 2:7; 1:74; 1:4;' n from dual)
+select * from 
+(
+select a.a, a.n, replace(a.n,':','') aa,
+(length(a.n) - length(replace(a.n,':','')))/1 ab, b.n bn, 
+instr(a.n,';',1,b.n) ac,
+coalesce(lag(instr(a.n,';',1,b.n)) over (partition by a.a order by b.n asc),1) ad,
+replace(substr(a.n,coalesce(lag(instr(a.n,';',1,b.n)) over (partition by a.a order by b.n asc) + 2,1),
+instr(a.n,';',1,b.n) - coalesce(lag(instr(a.n,';',1,b.n)) over (partition by a.a order by b.n asc),1)),';','') m
+from  a,
+(select rownum n from dual connect by rownum < 100)b
+where (length(a.n) - length(replace(a.n,':','')))/1 >= b.n
+)
+--where m  like '%3%'
+order by 4,5
+
+сортировка данных выполняется конструкцией ... ORDER BY  f1 asc/desc, f2 asc/desc, ... , fn asc/desc nulls last/first, 
+сортировка в пределах запроса является завершающей операцией, asc - сортировка по возрастанию, desc - сортировка по убыванию
+with a as (select rownum n, rownum/3 m from dual connect by rownum < 10),
+ b as (select rownum n, case when mod(rownum,2) = 0 then null else rownum/7 end m 
+ from dual connect by rownum < 10)
+select n, m  from a
+union all
+select n, m from b
+order by n, m desc
+
+with a as (select rownum n, rownum/3 m from dual connect by rownum < 10),
+ b as (select rownum n, case when mod(rownum,2) = 0 then null else rownum/7 end m 
+ from dual connect by rownum < 10)
+select n nn, m as "Hello world"  from a
+union all
+select n, m from b
+order by nn, "Hello world" desc
+
+по умолчанию выбирается asc и nulls last (место нахождение в писке сортировки null значений)
+with a as (select rownum n, rownum/3 m from dual connect by rownum < 10),
+ b as (select rownum n, case when mod(rownum,2) = 0 then null else rownum/7 end m 
+ from dual connect by rownum < 10)
+select n, m  from a
+union all
+select n, m from b
+order by n asc, m desc nulls last
+
+with a as (select rownum n, rownum/3 m from dual connect by rownum < 10),
+ b as (select rownum n, case when mod(rownum,2) = 0 then null else rownum/7 end m 
+ from dual connect by rownum < 10)
+select n, m  from a
+union all
+select n, m from b
+order by n desc, m desc nulls first
+
+для сортировки может быть использовано поле таблицы из запроса, оно может отсутствовать в результирующих полях , вычисляемое поле,
+
+with b as (select rownum n, case when mod(rownum,2) = 0 then null else rownum/7 end m 
+ from dual connect by rownum < 10)
+select n, m  from b
+order by n desc, m desc nulls first
+
+with b as (select rownum n, case when mod(rownum,2) = 0 then null else rownum/7 end m 
+ from dual connect by rownum < 10)
+select m  from b
+order by n desc, m desc nulls first
+
+обращение к полю сортировки может быть по имени поля, либо по номеру результирующего поля
+
+with b as (select rownum n, case when mod(rownum,2) = 0 then null else rownum/7 end m 
+ from dual connect by rownum < 10)
+select n, m  from b
+order by 1 desc, m/1 desc nulls first
+
+6.1 преобразование данных, group 
+При необходимости удаления дубликатов и агрегирования результатов выборки применяется преобразование данных с помощью group, обрабатывается полученный датасет, в результате формируется новый, часто с изменением количества строк и структуры полей.  Базовая конструкция select f1, f2, ... , fn, func1(fn + 1),..., funck(fn + m) from .... where .... group by f1, f2, ... , fn  having f1 ... and/or fn ... and/or func1(fn + 1)... and/or funck(fn + m) ... где func – груповая функция.
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40)   
+select n, max(m), min(d) from b group by n having n != 0 and mod(max(m),2) = 0
+
+6.2 некоторые групповые функции, блок having
+блок having задает условия фильтра для GROUP, как where для select, запись полученная при группировке попадет в результирующий датасет если результирующее значение having равно true(истина)
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40)   
+select n, max(m), min(d) from b where 1 = 1 group by n having 1 = 1 
+
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40)   
+select n, max(m), min(d) from b where 1 = 1 group by n having 1 = 2
+
+групповые функции
+AVG – среднее значение по полю для сгруппированных строк
+COUNT – число сгруппированных строк
+SUM – сумма значения по полю для сгруппированных строк
+MIN - минимальное значения по полю для сгруппированных строк
+MAX - максимальное значение по полю для сгруппированных строк
+применение конструкции DISTINCT исключает дублирующие значения поля
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40)   
+select n, avg(m), sum(m), count(*), sum(m)/count(*), min(m), max(m),
+sum(distinct m), count(distinct m) 
+from b where 1 = 1 group by n having 1 = 1
+пример применения
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40),   
+c as ( select * from b union all select 7 n, 7 m, sysdate d from dual 
+ union all select 7 n, 7 m, sysdate d from dual  union all select 8 n, 8 m, sysdate d from dual)
+select n, avg(m), sum(m), count(*), sum(m)/count(*), min(m), max(m),
+sum(distinct m), count(distinct m)
+from c where 1 = 1 group by n having 1 = 1
+выбрать группы в которых в группируемых строках есть различия в значениях по полю в группировке
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40),   
+c as ( select * from b union all select 7 n, 7 m, sysdate d from dual 
+ union all select 7 n, 7 m, sysdate d from dual  union all select 8 n, 8 m, sysdate d from dual)
+select n, avg(m), sum(m), count(*), count(distinct m),  sum(m)/count(*), min(m), max(m),
+sum(distinct m) from c where 1 = 1 
+group by n having ((min(m) != max(m) or count(distinct m) > 1) and count(*) > 1) or count(*) = 1
+
+выбрать группы в которых одна группируемая строка
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40),   
+c as ( select * from b union all select 7 n, 7 m, sysdate d from dual 
+ union all select 7 n, 7 m, sysdate d from dual  union all select 8 n, 8 m, sysdate d from dual)
+select n, avg(m), sum(m), count(*), count(distinct m),  sum(m)/count(*), min(m), max(m),
+sum(distinct m) from c where 1 = 1 group by n  having count(*) = 1
+
+выбрать группы в которых в группируемых строках количество четных значений больше нечетных по полю в группировке
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40),   
+c as ( select * from b union all select 7 n, 7 m, sysdate d from dual 
+ union all select 7 n, 7 m, sysdate d from dual  union all select 8 n, 8 m, sysdate d from dual)
+select n, avg(m), sum(m), count(*), count(distinct m), sum(m)/count(*), min(m), max(m),
+sum(distinct m) from c where 1 = 1 group by n 
+having sum(case when mod(m,2) = 0  then 1 else 0 end) > sum(case when mod(m,2) != 0  then 1 else 0 end)
+если операндом в групповой функции встречается null значение, данная строка исключается из вычисления значений функции
+
+with a as (select null a, 1 b, 1 c from dual 
+union all select 2 , null, 2 from dual 
+union all select null , 3, 3  from dual 
+union all select 4, 4, 4  from dual)
+select count(*), count(a), count(b), count(c), sum(a), sum(b), sum(c)  from a
+
+RANK(k) WITHIN GROUP (ORDER BY m desc), – присваивает ранг порядковую позицию для  константы k
+отсортированном списке значений m строк группировки
+rc – значение количество строк группировки значение которых превышает k
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40),   
+c as ( select * from b union all select 7 n, 7 m, sysdate d from dual 
+ union all select 7 n, 8 m, sysdate d from dual  union all select 8 n, 51 m, sysdate d from dual)
+select n, RANK(22) WITHIN GROUP (ORDER BY m desc),
+count(*), min(m), max(m)
+from c where 1 = 1
+group by n having 1 = 1 
+
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40),   
+c as ( select * from b union all select 7 n, 7 m, sysdate d from dual 
+ union all select 7 n, 8 m, sysdate d from dual  union all select 8 n, 51 m, sysdate d from dual)
+select *
+from c where c.n = 0
+
+GROUP_ID – возвращает уровень группировки для записи
+GROUPING(а) - возвращает 1 если для результата выполнялась группировка по полю f
+GROUPING_ID(fa,fb) - возвращает номер поля если для результата выполнялась группировка по неполному списку полей и 0 если по полному 
+GROUPING SETS – задает группы для группировки
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40),   
+c as ( select * from b union all select 7 n, 7 m, sysdate d from dual 
+ union all select 7 n, 8 m, sysdate d from dual  union all select 8 n, 51 m, sysdate d from dual)
+select n, trunc(d), GROUP_ID(), GROUPING(n), GROUPING_ID(n, trunc(d)), 
+avg(m), sum(m), count(*), count(distinct m), sum(m)/count(*), min(m), max(m),
+sum(distinct m)
+from c where 1 = 1
+group by GROUPING SETS ((n),(trunc(d)), (n), (n, trunc(d))) having 1 = 1
+
+DENSE_RANK, KEEP, FIRST, LAST 
+WITH test AS
+(SELECT 'a' name, 1 sal, 1 deptno FROM DUAL
+UNION ALL SELECT 'b', 1, 1 FROM DUAL
+UNION ALL SELECT 'c', 1, 1 FROM DUAL
+UNION ALL SELECT 'd', 2, 1 FROM DUAL
+UNION ALL SELECT 'e', 3, 1 FROM DUAL
+UNION ALL SELECT 'f', 3, 1 FROM DUAL
+UNION ALL SELECT 'g', 4, 2 FROM DUAL
+UNION ALL SELECT 'h', 4, 2 FROM DUAL
+UNION ALL SELECT 'i', 5, 2 FROM DUAL
+UNION ALL SELECT 'j', 5, 2 FROM DUAL
+)
+SELECT --DISTINCT
+  MIN(sal) KEEP (DENSE_RANK FIRST ORDER BY sal) AS min_sal_first_sal,
+  MAX(sal) KEEP (DENSE_RANK FIRST ORDER BY sal) AS max_sal_first_sal,
+  MIN(sal) KEEP (DENSE_RANK LAST ORDER BY sal) AS min_sal_first_sal,
+  MAX(sal) KEEP (DENSE_RANK LAST ORDER BY sal) AS max_sal_first_sal,
+  MIN(name) KEEP (DENSE_RANK FIRST ORDER BY sal) AS min_name_first_sal,
+  MAX(name) KEEP (DENSE_RANK FIRST ORDER BY sal) AS max_name_first_sal,
+  MIN(name) KEEP (DENSE_RANK LAST ORDER BY sal) AS min_name_last_sal,
+  MAX(name) KEEP (DENSE_RANK LAST ORDER BY sal) AS max_name_last_sal,
+  deptno
+FROM test group by deptno
+
+конструкцию KEEP DENSE_RANK на практике можно использовать для чтения полей группировки в зависимости от свойства одного из полей группировки, например, узнать значения параметров на начальный момент периода или в какой момент времени в параметр достиг максимального значения
+
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40),   
+c as ( select * from b union all select 7 n, 7 m, sysdate d from dual 
+ union all select 7 n, 8 m, sysdate d from dual  union all select 8 n, 51 m, sysdate d from dual)
+select * from c order by 1,2,3
+n – параметр группировки
+dm_dmin – значение параметра m для минимального значения d
+p_dmin – минимальное значение d
+dm_dmax – значение параметра m для максимального значения d
+p_dmax – максимальное значение d
+ld_pmin – значение параметра d для минимального значения m
+l_pmin - минимальное значение m
+ld_pmax – значение параметра d для максимального значения m
+l_pmax - максимальное значение m
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40),   
+c as ( select * from b union all select 7 n, 7 m, sysdate d from dual 
+ union all select 7 n, 8 m, sysdate d from dual  union all select 8 n, 51 m, sysdate d from dual)
+select n, 
+MIN(M) KEEP (DENSE_RANK FIRST ORDER BY D nulls last) AS dm_dmin,
+min(D) as p_dmin,
+MAX(M) KEEP (DENSE_RANK LAST ORDER BY D nulls first) AS dm_dmax,
+max(D) as p_dmax,
+MIN(d) KEEP (DENSE_RANK FIRST ORDER BY m nulls last) AS ld_pmin,
+min(m) as l_pmin,
+MAX(d) KEEP (DENSE_RANK LAST ORDER BY m nulls first) AS ld_pmax,
+max(m) as l_pmax
+from c where 1 = 1
+group by n having 1 = 1
+order by 1
+
+6.3 cube, rollup
+rollup – выполняет дополнительную группировку по выбранным полям и в разрезе полей, в порядке слева направо, добавляются строки с данными для общего значения, для сочетаний первого поля, далее для сочетаний первого и второго поля, ... 
+WITH a AS
+(SELECT 'a' name, 1 sal, 1 deptno FROM DUAL
+UNION ALL SELECT 'b', 1, 1 FROM DUAL
+UNION ALL SELECT 'c', 1, 1 FROM DUAL
+UNION ALL SELECT 'd', 2, 1 FROM DUAL
+UNION ALL SELECT 'i', 3, 1 FROM DUAL
+UNION ALL SELECT 'f', 3, 1 FROM DUAL
+UNION ALL SELECT 'g', 4, 2 FROM DUAL
+UNION ALL SELECT 'h', 4, 2 FROM DUAL
+UNION ALL SELECT 'i', 5, 2 FROM DUAL
+UNION ALL SELECT 'b', 5, 2 FROM DUAL)
+SELECT GROUP_ID(), GROUPING(deptno), GROUPING(sal), GROUPING_ID(deptno,sal),
+deptno, sal, count(distinct name) 
+from a group by rollup(deptno, sal)
+
+cube – выполняет дополнительную группировку по выбранным полям и в разрезе полей, в порядке справа на лево, добавляются строки с данными для общего значения, для сочетаний последнего поля, далее для сочетаний последнего и предпоследнего поля, ... 
+ 
+WITH a AS
+(SELECT 'a' name, 1 sal, 1 deptno FROM DUAL
+UNION ALL SELECT 'b', 1, 1 FROM DUAL
+UNION ALL SELECT 'c', 1, 1 FROM DUAL
+UNION ALL SELECT 'd', 2, 1 FROM DUAL
+UNION ALL SELECT 'i', 3, 1 FROM DUAL
+UNION ALL SELECT 'f', 3, 1 FROM DUAL
+UNION ALL SELECT 'g', 4, 2 FROM DUAL
+UNION ALL SELECT 'h', 4, 2 FROM DUAL
+UNION ALL SELECT 'i', 5, 2 FROM DUAL
+UNION ALL SELECT 'b', 5, 2 FROM DUAL)
+SELECT GROUP_ID(), GROUPING(deptno), GROUPING(sal), GROUPING_ID(deptno,sal),
+deptno, sal, count(distinct name) 
+from a group by cube(deptno, sal)
+
+6.4 применение вычисляемых полей
+при необходимости выгрузить запись последнего значения параметра, в таблице с историей в которой нет дублирования полей по дате изменения, можно использовать базовый сценарий, но необходимо 2 чтения таблицы с 1 группировкой
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40),   
+c as ( select * from b union all select 7 n, 7 m, sysdate d from dual 
+ union all select 7 n, 8 m, sysdate + 1/24/60 d from dual  union all select 8 n, 51 m, sysdate d from dual)
+select c.* from 
+(select n, max(d) md from c group by n) aa, c
+where aa.n = c.n and aa.md = c.d
+
+можно использовать конструкцию  KEEP DENSE_RANK с 1 чтением таблицы с 1 группировкой
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40),   
+c as ( select * from b union all select 7 n, 7 m, sysdate d from dual 
+ union all select 7 n, 8 m, sysdate + 1/24/60 d from dual  union all select 8 n, 51 m, sysdate d from dual)
+select c.n, MAX(M) KEEP (DENSE_RANK LAST ORDER BY D nulls first) AS m,
+max(D) as d from c group by n
+
+можно использовать вычисляемые поля с 1 чтением таблицы с 1 группировкой
+with b as (select mod(rownum,7) n, rownum m, 
+trunc(sysdate) + (5 -  mod(rownum,5))/24  + rownum/24/60 d from dual connect by rownum < 40),   
+c as ( select * from b union all select 7 n, 7 m, sysdate d from dual 
+ union all select 7 n, 8 m, sysdate + 1/24/60 d from dual  union all select 8 n, null m, sysdate d from dual)
+select c.n, to_number(substr(max(to_char(d,'YYYYMMDDHH24MISS')||to_char(m)),15,100)) m,
+max(D) as d from c group by n
+
+7.1 некоторые аналитические функции
+Используются для дополнительных вычислений с полученным набором данных SQL запроса. Их применение не влияет на количество записей набора данных в отличии от группировки:
+
+with a as (select rownum n from dual connect by rownum < 11)
+select sum(n) from a
+--
+with a as (select rownum n from dual connect by rownum < 11)
+select sum(n) over () from a
+
+аналитические функции упрощают обработку данных вычисляемых полей, уменьшают нагрузку на систему:
+with a as (select rownum n from dual connect by rownum < 11),
+c as (select sum(n) n from a)
+select a.n, sum(b.n), max(c.n) 
+from a, a b, c 
+where b.n <= a.n group by a.n
+--
+with a as (select rownum n from dual connect by rownum < 11)
+select a.n, sum(a.n) over (order by a.n), 
+sum(n) over ()
+from a
+
+Синтаксис:
+ИМЯ_ФУНКЦИИ(<аргумент>,< аргумент >, . . . )
+OVER
+(<конструкция_фрагментации> <конструкция_упорядочения> <конструкция_окна>)
+
+Конструкция фрагментации
+Конструкция PARTITION BY логически разбивает результирующее множество на N групп по критериям, задаваемым выражениями фрагментации. Аналитические функции применяются к каждой группе независимо, — для каждой новой группы они сбрасываются. Если не указать конструкцию фрагментации, все результирующее множество считается одной группой. Каждая аналитическая функция в запросе может иметь уникальную конструкцию фрагментации
+with a as (select (rownum - trunc(rownum/3)*3) g1,  (rownum - trunc(rownum/5)*5) g2,
+rownum n from dual connect by rownum < 30)
+select a.*, sum(n) over(partition by g1), max(n) over(partition by g2) from a
+
+Конструкция упорядочения
+Конструкция ORDER BY задает критерий сортировки данных в каждой группе (порядок расположения строк в группе). Это влияет на результат выполнения любой аналитической функции. При наличии (или отсутствии) конструкции ORDER BY аналитические функции вычисляются по-другому. Конструкция ORDER BY в аналитических функциях имеет следующий синтаксис:
+ORDER BY выражение [ASC | DESC] [NULLS FIRST | NULLS LAST]
+
+with a as (select (rownum - trunc(rownum/3)*3) g1,  (rownum - trunc(rownum/5)*5) g2,
+rownum n from dual connect by rownum < 30)
+select a.*, sum(n) over(partition by g1), sum(n) over(partition by g1 order by n),
+FIRST_VALUE(n) over(partition by g1 order by n asc),  
+FIRST_VALUE(n) over(partition by g1 order by n desc) from a
+
+Наличие конструкции ORDER BY в вызове аналитической функции добавляет стандартную конструкцию окна—RANGE UNBOUNDED PRECEDING. Это означает, что для вычисления используется набор из всех предыдущих и текущей строки в текущем фрагменте. При отсутствии ORDER BY стандартным окном является весь фрагмент.
+
+Аналитические функции:
+
+LAST_VALUE - Возвращает последнее значение в группе.
+Группа не отсортирована, диапазон окна все значения
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, LAST_VALUE(n) over(partition by g) from a
+--
+Группа отсортирована второй функцией, диапазон окна второй функции все значения до действующей строки
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, LAST_VALUE(n) over(partition by g),
+LAST_VALUE(n) over(partition by g order by n) from a
+--
+Группа отсортирована функцией присвоения номера, диапазон окна первой функции все значения
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, LAST_VALUE(n) over(partition by g),
+row_number() over(partition by g order by n) from a
+--
+
+FIRST_VALUE - Возвращает первое значение в группе.
+Группа не отсортирована, диапазон окна все значения
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, FIRST_VALUE(n) over(partition by g) from a
+Группа отсортирована второй функцией, диапазон окна второй функции все значения до действующей строки
+--
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, FIRST_VALUE(n) over(partition by g),
+FIRST_VALUE(n) over(partition by g order by n) from a
+Группа отсортирована функцией присвоения номера, диапазон окна первой функции все значения
+--
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, FIRST_VALUE(n) over(partition by g),
+row_number() over(partition by g order by n) from a
+
+Sum - Вычисляет общую сумму значений выражения для группы
+Диапазон окна все значения
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, SUM(n) over(partition by g) from a
+
+Диапазон окна второй функции все значения до действующей строки
+--
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, SUM(n) over(partition by g),
+SUM(n) over(partition by g order by n) from a
+
+Min - Находит минимальное значение выражения в пределах окна в группе
+Обрабатываются все строки группы 
+
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, min(n) over(partition by g)  from a
+
+Обрабатываются все значения до действующей строки согласно сортировки
+--
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, min(n) over(partition by g order by n asc)  from a
+
+Обрабатываются все значения до действующей строки согласно сортировки 
+--
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, min(n) over(partition by g order by n desc)  from a
+
+Max - Находит максимальное значение выражения в пределах окна в группе
+
+Обрабатываются все строки группы 
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, max(n) over(partition by g)  from a
+
+Обрабатываются все значения до действующей строки согласно сортировки
+--
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, max(n) over(partition by g order by n asc)  from a
+
+Обрабатываются все значения до действующей строки согласно сортировки
+--
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, max(n) over(partition by g order by n desc)  from a
+
+на MIN, MAX влияет только сортировка на уровне функции, на LAST_VALUE и FIRST_VALUE влияет порядок строк группы. Поэтому для первого и последнего значения группы желательно использовать функции MIN, MAX
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, min(n) over(partition by g) min_a, max(n) over(partition by g) max_a, 
+FIRST_VALUE(n) over (partition by g) f_v_a, LAST_VALUE(n) over(partition by g) l_v_a, 
+row_number() over(partition by g order by n desc) rn, 
+FIRST_VALUE(n) over(partition by g order by n asc) f_v_asc, LAST_VALUE(n) over(partition by g order by n asc) l_v_asc, 
+FIRST_VALUE(n) over(partition by g order by n desc) f_v_desc, LAST_VALUE(n) over(partition by g order by n desc) l_v_desc
+from a;
+--
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, min(n) over(partition by g) min_a, max(n) over(partition by g) max_a, 
+FIRST_VALUE(n) over (partition by g) f_v_a, LAST_VALUE(n) over(partition by g) l_v_a, 
+row_number() over(partition by g order by n asc) rn, 
+FIRST_VALUE(n) over(partition by g order by n asc) f_v_asc, LAST_VALUE(n) over(partition by g order by n asc) l_v_asc, 
+FIRST_VALUE(n) over(partition by g order by n desc) f_v_desc, LAST_VALUE(n) over(partition by g order by n desc) l_v_desc
+from a;
+
+COUNT([DISTINCT][*] [выражение]) - Эта функция считает строки в группах. Если указать * или любую константу, кроме NULL, функция count будет считать все строки. Если указать выражение, функция count будет считать строки, для которых выражение имеет значение не NULL. Можно задавать модификатор DISTINCT, чтобы считать строки в группах после удаления дублирующихся строк
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, COUNT(n) over(partition by g order by n), COUNT(n) over(partition by g), 
+COUNT(g) over(), COUNT(distinct g) over(),  
+COUNT(case when g = n then 1 end ) over(partition by g)  from a
+
+ROW_NUMBER - Возвращает смещение строки по отношению к началу упорядоченной группы. Может использоваться для последовательной нумерации строк, упорядоченных по определенным критериям. Применение сортировки в аналитической функции меняет порядок строк группы.
+
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, row_number() over(partition by g order by n asc) rn, 
+row_number() over(partition by g order by n desc) rn2  from a;
+--
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, row_number() over(partition by g order by n desc) rn2,
+row_number() over(partition by g order by n asc) rn from a;
+--
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, row_number() over(partition by g order by n desc) rn2,
+row_number() over(partition by g order by n asc) rn from a order by 1,2 asc;
+
+LAG (выражение, <смещение>, <стандартное значение>) - Функция LAG дает доступ к другим строкам
+результирующего множества, избавляя от необходимости выполнять само соединения. Она позволяет работать с курсором как с массивом. Можно ссылаться на строки, предшествующие текущей строке в группе. Смещение - это положительное целое число со стандартным значением 1 (предыдущая строка). Стандартное значение возвращается, если индекс выходит за пределы окна (для первой строки группы будет возвращено стандартное значение).
+
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, LAG(n) over(partition by g order by n desc) v1,
+LAG(n,1) over(partition by g order by n desc) v2,    
+LAG(n,1,0) over(partition by g order by n desc) v3,
+LAG(n,2,0) over(partition by g order by n desc) v4 from a;
+
+LEAD (выражение, <смещение>, <стандартное значение>) - Функция LEAD противоположна функции LAG. Если функция LAG дает доступ к предшествующим строкам группы, то функция LEAD позволяет обращаться к строкам, следующим за текущей. Смещение — это положительное целое число со стандартным значением 1 (следующая строка). Стандартное значение возвращается, если индекс выходит за пределы окна (для последней строки группы будет возвращено стандартное значение).
+
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11)
+select a.*, LEAD(n) over(partition by g order by n desc) v1,
+LEAD(n,1) over(partition by g order by n desc) v2,    
+LEAD(n,1,0) over(partition by g order by n desc) v3,
+LEAD(n,2,0) over(partition by g order by n desc) v4 from a;
+
+RANK - Эта функция вычисляет относительный ранг каждой строки, возвращаемой запросом, на основе значений выражений, входящих в конструкцию ORDER BY. Данные в группе сортируются в соответствии с конструкцией ORDER BY, а затем каждой строке поочередно присваивается числовой ранг, начиная с 1. Строки с одинаковыми значениями выражений, входящих в конструкцию ORDER BY, получают одинаковый ранг, но  если две строки получат одинаковый ранг, следующее значение ранга пропускается. Если две строки получили ранг 1, строки с рангом 2 не будет; следующая строка в
+группе получит ранг 3. В этом отличие от функции DENSE_RANK, которая не пропускает значений.
+
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11),
+b as (select * from a union all select * from a )
+select b.*, RANK() over (partition by g order by n asc)
+from b;
+
+DENSE_RANK - Эта функция вычисляет относительный ранг каждой возвращаемой запросом строки по отношению к другим строкам, основываясь на значениях выражений в конструкции ORDER BY. Данные в группе сортируются в соответствии с конструкцией ORDER BY, а затем каждой
+строке поочередно присваивается числовой ранг, начиная с 1. Ранг увеличивается при каждом изменении значений выражений, входящих в конструкцию ORDER BY. Строки с одинаковыми значениями получают один и тот же ранг (при этом сравнении значения NULL считаются
+одинаковыми). Возвращаемый этой функцией "плотный" ранг дает ранговые значения без промежутков. 
+
+with a as (select (rownum - trunc(rownum/3)*3) g,  rownum n from dual connect by rownum < 11),
+b as (select * from a union all select * from a )
+select b.*, DENSE_RANK() over (partition by g order by n asc)
+from b;
+
+7.2 окна данных
+
+Окно данных – набор строк из группы используемых при вычислении значения аналитической функции.  
+Для задания окна данных в функции необходимо указать конструкцию - order by, без задания окна обрабатываются все строки группы.  
+
+Окно задается относительно текущей строки и определяется полями сортировки конструкции order by, есть ограничение по типу данных для задания окон для конструкции RANGE может быть только NUMBER или DATE.  
+
+Синтаксис: 
+ROWS/RANGE BETWEEN (CURRENT ROW/ Выражение PRECEDING) AND (CURRENT ROW/ Выражение FOLLOWING)
+
+Основные элементы:
+ROWS/RANGE – опредяляет способ задания окна, 
+ROWS – задает размерность(смещение) в строках
+RANGE - задает размерность(смещение) выполнением условия по значению поля сортировки
+
+границы окна определяются элементами:
+CURRENT ROW – текущая строка
+Выражение PRECEDING - смещение на выражение перед текущей строкой, задает начало диапазона
+UNBOUNDED PRECEDING - смещение с первой по текущую строку, задает начало диапазона
+Выражение FOLLOWING - смещение на выражение после текущей строки, задает конец диапазона
+UNBOUNDED FOLLOWING - смещение с текущей строки по последнюю строку, задает конец диапазона
+BETWEEN начало AND конец – задание диапазона окна двумя смещениями
+
+Варианты окон:
+
+Поле v_all - для каждой строки группы (группа задается полем G)  суммируется значение поля N всех строк группы
+Поле v_all_r - для каждой строки группы (группа задается полем G)  суммируется значение поля N всех строк группы в диапазоне от первой строки до текущей и от  текущей до последней
+Поле v_all_d - для каждой строки группы (группа задается полем G)  суммируется значение поля N всех строк группы в диапазоне значений поля N от первого значения  до текущей строки и от текущей строки до последнего значения
+Варианты эквивалентны.
+
+with a as (select /*(rownum - trunc(rownum/3)*3)*/ 1 g,  rownum * 2 n from dual connect by rownum < 11)
+select a.*, sum(n) over (partition by g ) v_all,
+sum(n) over (partition by g order by n asc rows between UNBOUNDED PRECEDING and UNBOUNDED FOLLOWING ) v_all_r,
+sum(n) over (partition by g order by n asc range between UNBOUNDED PRECEDING and UNBOUNDED FOLLOWING ) v_all_d
+from a;
+
+Поле v_fir_cur - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы с первой по текущую строку. 
+Поле v_fir_cur_r - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы с первой по текущую строку. 
+Поле v_fir_cur_d - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы в диапазоне значений поля N от первого значения по текущую строку. 
+Поле v_fir_cur_r2 - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы с первой по текущую строку. 
+Поле v_fir_cur_d2 - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы в диапазоне значений поля N от первого значения по текущую строку. 
+Поле v_cur_r - для каждой строки группы (группа задается полем G)  суммируется значение поля N текущей строки. 
+Поле v_cur_d - для каждой строки группы (группа задается полем G)  суммируется значение поля N текущей строки. 
+
+with a as (select /*(rownum - trunc(rownum/3)*3)*/ 1 g,  rownum * 2 n from dual connect by rownum < 11)
+select a.*, sum(n) over (partition by g order by n asc) v_fir_cur,
+sum(n) over (partition by g order by n asc rows UNBOUNDED PRECEDING) v_fir_cur_r,
+sum(n) over (partition by g order by n asc range UNBOUNDED PRECEDING) v_fir_cur_d,
+sum(n) over (partition by g order by n asc rows between UNBOUNDED PRECEDING and CURRENT ROW) v_fir_cur_r2,
+sum(n) over (partition by g order by n asc range between UNBOUNDED PRECEDING and CURRENT ROW) v_fir_cur_d2,
+sum(n) over (partition by g order by n asc rows CURRENT ROW) v_cur_r,
+sum(n) over (partition by g order by n asc range CURRENT ROW) v_cur_d
+from a;
+
+Поле v_cur_last_r - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы с текущей строки по последнюю строку. 
+Поле v_cur_last_d - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы в диапазоне значений поля N  от текущей строки по последнее значение. 
+
+with a as (select /*(rownum - trunc(rownum/3)*3)*/ 1 g,  rownum * 2 n from dual connect by rownum < 11)
+select a.*,sum(n) over (partition by g order by n asc rows between current row and UNBOUNDED FOLLOWING) v_cur_last_r,
+sum(n) over (partition by g order by n asc range between current row and UNBOUNDED FOLLOWING) v_cur_last_d
+from a;
+
+Поле v_rn_cur - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы с третей строки перед текущей строкой по текущую включительно, например для строки с N = 8 суммируются строки 2,4,6,8 и значение функции равно 20. 
+Поле v_dn_cur - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы в диапазоне значений поля N  перед текущей строкой не превышающей разностное значение 3, например для строки с N = 8 суммируются строки 6,8 так как разница равна 2 < 3, 4 не попадает так как разница равна 4 > 3 и значение функции равно 14.
+Поле v_rn_cur2 - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы с третьей строки перед текущей строкой по текущую включительно (явно задана), например для строки с N = 8 суммируются строки 2,4,6,8 и значение функции равно 20. 
+Поле v_dn_cur2 - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы в диапазоне значений поля N  перед текущей строкой(явно задана) не превышающей разностное значение 3, например для строки с N = 8 суммируются строки 6,8 так как разница равна 2 < 3, 4 не попадает так как разница равна 4 > 3 и значение функции равно 14.
+Поле v_cur_rn - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы с текущей строки по третью строку, например для строки с N = 4 суммируются строки 4,6,8,10 и значение функции равно 28. 
+ Поле v_cur_dn - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы в диапазоне значений поля N  с текущей строки(явно задана) не превышающей разностное значение 3, например для строки с N = 4 суммируются строки 4,6 так как разница равна 2 < 3, 8 не попадает так как разница равна 4 > 3 и значение функции равно 10. 
+
+with a as (select /*(rownum - trunc(rownum/3)*3)*/ 1 g,  rownum * 2 n from dual connect by rownum < 11)
+select a.*, sum(n) over (partition by g order by n asc rows 3 PRECEDING) v_rn_cur,
+sum(n) over (partition by g order by n asc range 3 PRECEDING) v_dn_cur,
+sum(n) over (partition by g order by n asc rows between 3 PRECEDING and CURRENT ROW) v_rn_cur2,
+sum(n) over (partition by g order by n asc range between 3 PRECEDING and CURRENT ROW) v_dn_cur2,
+sum(n) over (partition by g order by n asc rows  between current row and 3 FOLLOWING) v_cur_rn,
+sum(n) over (partition by g order by n asc range  between current row and 3 FOLLOWING) v_cur_dn
+from a;
+
+Поле v_rn1_rn2 - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы с третьей строки перед текущей строкой по третью строку после, например для строки с N = 10 суммируются строки 4,6,8,10,12,14,16 и значение функции равно 70. 
+ Поле v_dn1_dn2 - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы в диапазоне значений поля N  перед текущей строкой не превышающей разностное значение 3 по строки после текущей строки не превышающие разностное значение 3, например для строки с N = 10 суммируются строки 8,10,12 так как разница равна 2 < 3, 6 и 14 не попадает так как разница равна 4 > 3 и значение функции равно 30. 
+Поле v_rn1_rn2_ - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы с вычисляемого значения строки перед текущей строкой по третью строку после, например для строки с N = 10 вычисленное значение строки 1 суммируются строки 8,10,12,14,16 и значение функции равно 60. 
+Поле v_dn1_dn2_ - для каждой строки группы (группа задается полем G)  суммируется значение поля N строк группы в диапазоне значений поля N  перед текущей строкой не превышающей разностное вычисляемого значение по строки после текущей строки не превышающие разностное значение 3, например для строки с N = 10 разностное вычисленное значение 1  суммируются строки 10,12 так как разница равна перед 1 < 2 и 8 не попадает, разница после 3 и 14 не попадает так как разница равна 4 > 3 и значение функции равно 22. 
+Поле FN – вычисляемое значение.
+
+with a as (select /*(rownum - trunc(rownum/3)*3)*/ 1 g,  rownum * 2 n from dual connect by rownum < 11)
+select a.*, sum(n) over (partition by g order by n asc rows  between 3 PRECEDING and 3 FOLLOWING) v_rn1_rn2,
+sum(n) over (partition by g order by n asc range  between 3 PRECEDING and 3 FOLLOWING) v_dn1_dn2,
+sum(n) over (partition by g order by n asc rows  between n - trunc(n/3) * 3 PRECEDING and 3 FOLLOWING) v_dn1_dn2_,
+sum(n) over (partition by g order by n asc range  between n - trunc(n/3) * 3 PRECEDING and 3 FOLLOWING) v_dn1_dn2_,
+n - trunc(n/3) * 3 fn
+from a;
+
+7.3 вычисляемые поля, применение аналитические функции в запросах
+
+Соединение в диапазоны
+with 
+a as ( select rownum a from dual connect by rownum < 14),
+b as ( select a from a where a not in (4,6,22,9))
+--
+select  --c.*,
+case when c.a = lead(c.pr) over (order by c.a)
+then c.a  || ';' 
+else c.a  || ' - '|| Lead (c.pr,1,c.mx) over ( order by c.a ) || ';' end dp
+from 
+(select b.*,
+LAG(b.a) over ( order by b.a ) pr,
+max(b.a) over () mx
+from b ) c where coalesce(c.a - c.pr,0) != 1 
+
+последовательное сложение, вычитание
+with 
+a as ( select rownum a, rownum n from dual connect by rownum < 14)
+select a.a, sum(a.a) over(order by a.n) s, (a.a - trunc(a.a/3)*3) c,
+20 + sum(case when (a.a - trunc(a.a/3)*3) = 0 then a.a else 0 end) over(order by a.n) bal_I,
+20 + sum(case when (a.a - trunc(a.a/3)*3) = 0 then - a.a else 0 end) over(order by a.n) bal_D
+from a 
+
+первый часовой интервал с максимальным количеством звонков и трафика в выбранном периоде
+
+with a as ( select to_date('01012018','ddmmyyyy') + case when rownum between 100 and 200 
+then 100/1000 + rownum/1000 else rownum/500 end st,
+case when rownum between 250 and 300 then (rownum - trunc(rownum/3) * 3) * 30 
+  else (rownum - trunc(rownum/3) * 3) * 3 end + 1 dr,
+rownum n from dual connect by rownum < 500)
+--
+select max(hcn) ev_max,
+MAX(st) KEEP (DENSE_RANK FIRST ORDER BY hcn desc, st nulls first) - 1/24 ev_time,
+max(hdr) dur_max,
+MAX(st) KEEP (DENSE_RANK FIRST ORDER BY hdr desc, st nulls first) - 1/24 dur_time
+from (
+select a.*,
+count(dr) over (order by st range  between 1/24 PRECEDING and current row) hcn,
+sum(dr) over (order by st range  between 1/24 PRECEDING and current row) hdr
+from a
+)
+
+8.1 выгрузка данных SQLPLUS
+SQL plus программа выполнения SQL запросов, включена как компонент в клиент ORACLE, не имеет графический пользовательский интерфейс, но позволяет выполнять многие виды запросов и выводить результаты в поток вывода. Поддерживается возможность ввода пользователем переменных подстановки. Огромные возможности при использование небольших ресурсов, что очень полезно, когда необходимо выполнять много запросов возвращающих большой объем данных. ORACLE рекомендует использовать SQL plus при экспорте данных как и утилиту export. Многие выгрузки в плоские файлы выполняются с помощью SQL plus. Полное описание можно найти в документации ORACLE. 
+Создается командный файл test.bat и исполняемый файл test.sql.
+командный файл test.bat :
+echo off
+rem set NLS_LANG=AMERICAN_CIS.AL32UTF8
+...\sqlplus.exe -s usr/pass@db @test.sql
+
+echo off – отключить отображение выполняемых строк
+set NLS_LANG=AMERICAN_CIS.AL32UTF8 – установка кодовой страницы на сессию
+...\sqlplus.exe -s usr/pass@db @test.sql – запуск SQL plus
+-s параметр отключающий отображение данных о SQL plus(все параметры можно увидеть запустив ...\sqlplus.exe -h)
+Usr – пользователь соединения
+Pass – пароль пользователя
+Db – настройка БД соединения
+@test.sql – запускаемый файл
+
+исполняемый файл test.sql:
+SET NEWPAGE 0
+SET SPACE 0
+SET LINESIZE 32000
+SET PAGESIZE 0
+SET ECHO OFF
+SET FEEDBACK OFF
+SET VERIFY OFF
+SET HEADING OFF
+SET TRIMSPOOL on
+SET SERVEROUTput ON
+-- set termout off
+SET ARRAY 5000 
+
+variable vch varchar2(50);
+variable vn number;
+variable vcr REFCURSOR;
+exec :vch := 'hello world';
+exec :vn := 1;
+begin
+  open :vcr for select 1 a, 2 b from dual
+  union all select 2, 2 b from dual 
+  union all select 3, 2 b from dual;
+exception
+  when others then
+    DBMS_output.PUT_LINE(SUBSTR(SQLERRM, 1, 100));
+end;
+/
+spool test.txt
+print :vch;
+print :vn;
+print :vcr;
+--
+@time.sql;
+@@curout.sql;
+print :vcr;
+select sysdate from dual; 
+exec DBMS_output.PUT_LINE('IT IS READY '||SYSDATE);
+--
+spool off
+quit
+
+назначение строк:
+Блок настройки параметров SQL plus рекомендованной ORACLE для выгрузки данных
+SET NEWPAGE 0 – количество строк в странице
+SET SPACE 0 – количество пустых строк между записями
+SET LINESIZE 32000 – размерность строки при выводе, желательно задавать согласно размерности данных
+SET PAGESIZE 0  
+SET ECHO OFF
+SET FEEDBACK OFF
+SET VERIFY OFF
+SET HEADING OFF – выключить заголовки
+SET TRIMSPOOL on – убирать лишни пробелы в конце строки
+SET SERVEROUTput ON – подключить поток вывода DBMS_OUTPUT
+set termout off – отключить вывод на терминал
+SET ARRAY 5000 – размер буфера строк вывода данных, максимально 5000
+
+Блок объявления переменных
+variable vch varchar2(50);
+variable vn number;
+variable vcr REFCURSOR;
+
+присвоение данных
+exec :vch := 'hello world';
+exec :vn := 1;
+
+запуск PL/SQL блока
+begin
+  open :vcr for select 1 a, 2 b from dual
+  union all select 2, 2 b from dual 
+  union all select 3, 2 b from dual;
+exception
+  when others then
+    DBMS_output.PUT_LINE(SUBSTR(SQLERRM, 1, 100));
+end;
+/
+Включаю вывод в файл
+spool test.txt
+
+вывод  переменных
+print :vch;
+print :vn;
+print :vcr;
+--
+Запуск SQL запроса из файла
+@time.sql;
+
+Запуск PL/SQL блока из файла
+@@curout.sql;
+print :vcr;
+
+Запуск SQL запроса
+select sysdate from dual; 
+exec DBMS_output.PUT_LINE('IT IS READY '||SYSDATE);
+--
+Выключаю вывод в файл
+spool off
+
+Выход
+Quit
+
+Содержимое файла time.sql:
+select to_char(sysdate,'dd.mm.yyyy hh24:mi:ss') from dual;
+
+Содержимое файла curout.sql:
+begin
+  open :vcr for select 1,CHR(9),  to_char(sysdate,'dd.mm.yyyy hh24:mi:ss') from dual
+  union all select &a,CHR(9), to_char(sysdate + 1,'dd.mm.yyyy hh24:mi:ss') from dual
+  union all select 3,CHR(9), to_char(sysdate + 2,'dd.mm.yyyy hh24:mi:ss') from dual
+  union all select ROWNUM + 3, CHR(9), to_char(sysdate + ROWNUM + 3,'dd.mm.yyyy hh24:mi:ss') 
+  from dual connect by level < 100;
+end;
+/
+
+Пример простой выгрузки данных:
+командный файл test2.bat :
+rem set NLS_LANG=AMERICAN_CIS.AL32UTF8
+C:\app\client\Vitaliy.Boikov\product\12.2.0\client_1\bin\sqlplus.exe -s dummy/dummy@xe @test2.sql
+
+исполняемый файл test2.sql:
+SET NEWPAGE 0
+SET SPACE 0
+SET LINESIZE 2000
+SET PAGESIZE 0
+SET ECHO OFF
+SET FEEDBACK OFF
+SET VERIFY OFF
+SET HEADING OFF
+SET TRIMSPOOL on
+SET SERVEROUTput ON
+set termout off
+SET ARRAY 5000 
+
+spool test2.txt
+select username||chr(9)||'XFILLER'||'-'||to_char(user_id)||';'||to_char(created,'yyyymmddhh24miss') from all_users; 
+spool off
+quit
+
+8.2 загрузка данных SQLLDR
+SQL*Loader – инструмент загрузки данных, входит в клиент ORACLE, при установке надо выбирать опцию с функциями администрирования, пример использования:
+Создается исполняемый файл load_test.bat:
+C:\app\client\Vitaliy.Boikov\product\12.2.0\client_1\bin\sqlldr userid=dummy@xe/dummy control=load_test.ctl log=load_test.log data=test2.txt
+
+Userid – user@db/pass
+Control – конфигурационный файл
+Log – файл логирования
+Data – файл с данными
+
+Создается конфигурационный файл load_test.ctl: 
+OPTIONS (ROWS=10000, bindsize=20000000, errors=0 )
+Load DATA
+CHARACTERSET UTF8 
+truncate 
+--append
+INTO TABLE load_user
+TRAILING NULLCOLS
+(
+id_row EXPRESSION "load_seq.nextval",
+username CHAR(100) TERMINATED BY X'09',
+f1 FILLER CHAR TERMINATED BY "-",
+user_id CHAR TERMINATED BY ";",
+comm char(100) TERMINATED BY ";" "nvl(:comm,'NULL')",
+sdate date "yyyymmddhh24miss" TERMINATED BY X'09'
+)
+
+OPTIONS (ROWS=10000, bindsize=20000000, errors=0 )
+ROWS=10000 – фиксация каждых 10000 записей
+Bindsize=20000000 – размер буфера для загрузки 
+errors=0 – количество ошибок после которых загрузка прерывается
+
+CHARACTERSET UTF8 – кодовая страница
+
+truncate - существующие в таблице данные удаляются
+--append - существующие в таблице данные сохраняются
+
+INTO TABLE load_user - таблица загрузки
+
+TRAILING NULLCOLS - разрешить загрузку NULL значений
+
+id_row EXPRESSION "load_seq.nextval", - создаваемое поле при загрузке с помощью SQL (выборка значения из последовательности)
+username CHAR(100) TERMINATED BY X'09', - поле текстовое, размерности 100 разделитель "табуляция"
+f1 FILLER CHAR TERMINATED BY "-", - поле текстовое пропускаемое при загрузке, разделитель "-"
+user_id CHAR TERMINATED BY ";", - поле текстовое, разделитель, ";"
+comm char(100) TERMINATED BY ";" "nvl(:comm,'NULL')", - поле текстовое, разделитель, ";" с SQL преобразованием(вместо пустого значения подставляется NULL) 
+sdate date "yyyymmddhh24miss" TERMINATED BY X'09' - поле дата, формат "yyyymmddhh24miss" разделитель "табуляция"
+
+8.3 обработка больших блоков данных(merge, create as select, insert select error, rename, drop, truncate)
+
+Групповая операция merge
+
+Пример на числах
+create global temporary table XTEMP_t -- drop table XTEMP_t
+( N0  NUMBER,  N1  NUMBER,  N2  NUMBER,  N3  NUMBER,  N4  NUMBER,  N5  NUMBER)
+on commit preserve rows;
+create global temporary table XTEMP -- drop table XTEMP_t
+( N0  NUMBER,  N1  NUMBER,  N2  NUMBER,  N3  NUMBER,  N4  NUMBER,  N5  NUMBER)
+on commit preserve rows;
+
+begin
+  insert into XTEMP_t(n0,n1,n2) values(0,2,3); 
+  insert into XTEMP_t(n0,n1,n2) values(1,2,3); 
+  insert into XTEMP_t(n0,n1,n2) values(1,2,1);  
+  insert into XTEMP_t(n0,n1,n2) values(5,2,3); 
+  --
+  insert into XTEMP(n0,n1,n2) values(1,2,1);
+  --insert into XTEMP(n0,n1,n2) values(1,2,3);!!!    
+  insert into XTEMP(n0,n1,n2) values(2,2,3); 
+  insert into XTEMP(n0,n1,n2) values(3,2,3); 
+  insert into XTEMP(n0,n1,n2) values(4,2,3); 
+  insert into XTEMP(n0,n1,n2) values(5,2,3); 
+end;
+--
+select n0,n1,n2 from XTEMP_t
+select n0,n1,n2 from XTEMP
+-----
+
+Обновление данных, удаление(в условии не указана таблица поля по умолчанию это USING), вставка 
+
+MERGE INTO XTEMP_t D
+   USING (SELECT n0,n1,n2 FROM XTEMP
+   WHERE 1 = 1) S
+   ON (D.n0 = S.n0)
+   WHEN MATCHED THEN UPDATE SET D.n1 = D.n1 + S.n1*.5
+     DELETE WHERE (n2 = 1)
+   WHEN NOT MATCHED THEN INSERT (D.n0, D.n1, D.n2)
+     VALUES (s.n0, s.n1, s.n2)
+     WHERE (1 = 1)
+-----
+Обновление данных, удаление(в условии указана таблица INTO), вставка 
+
+MERGE INTO XTEMP_t D
+   USING (SELECT n0,n1,n2 FROM XTEMP
+   WHERE 1 = 1) S
+   ON (D.n0 = S.n0)
+   WHEN MATCHED THEN UPDATE SET D.n1 = D.n1 + S.n1*.5
+     DELETE WHERE (d.n2 = 1)
+   WHEN NOT MATCHED THEN INSERT (D.n0, D.n1, D.n2)
+     VALUES (s.n0, s.n1, s.n2)
+     WHERE (1 = 1)
+-----
+Обновление данных, удаление(в условии указана таблица USING), вставка
+MERGE INTO XTEMP_t D
+   USING (SELECT n0,n1,n2 FROM XTEMP
+   WHERE 1 = 1) S
+   ON (D.n0 = S.n0)
+   WHEN MATCHED THEN UPDATE SET D.n1 = D.n1 + S.n1*.5
+     DELETE WHERE (s.n2 = 1)
+   WHEN NOT MATCHED THEN INSERT (D.n0, D.n1, D.n2)
+     VALUES (s.n0, s.n1, s.n2)
+     WHERE (1 = 1)
+-----
+Обновление данных, удаление(обновление удаление происходит последовательно с одним набором данных), вставка
+MERGE INTO XTEMP_t D
+   USING (SELECT n0,n1,n2 FROM XTEMP
+   WHERE 1 = 1) S
+   ON (D.n0 = S.n0)
+   WHEN MATCHED THEN UPDATE SET D.n1 = 11
+     DELETE WHERE (d.n1 = 11)
+   WHEN NOT MATCHED THEN INSERT (D.n0, D.n1, D.n2)
+     VALUES (s.n0, s.n1, s.n2)
+     WHERE (1 = 1)
+-----
+
+Обновление данных в таблице, в партиции таблицы
+Update очень долгая и ресурсоемкая операция, при необходимости обновить данные в таблице при условии возможного отключения изменений таблицы другими пользователями на время работ, возможно использование 3 сценариев: 
+
+Исходные данные
+create table tab_data as-- drop table tab_data purge
+select cast(rownum  as number(4)) n, to_date('01.01.2018','dd.mm.yyyy') + rownum/1000 dt, 
+rownum - trunc(rownum/31)* 31  s  from dual connect by rownum < 10000
+--
+select * from tab_data
+
+1)Необходим доступ на создание таблиц, к табличному пространству и delete/insert в изменяемой таблице, таблица может находиться в любой схеме, пошаговое выполнение: 
+
+Пишется необходимый запрос, который сформирует скорректированные данные, и на его базе создается таблица, выполняется максимально быстро Create table as select
+create table tab_data2 as-- drop table tab_data2 purge
+select case when n/13 = trunc(n/13) then n + 100000 else n end n, 
+dt, s,rowid rw, dt - 1/86400 dtn from tab_data where s = 12
+
+Удаляются все записи в параллельном режиме из изменяемой таблицы Delete
+delete /*+parallel(a 8)*/ from tab_data a where a.s = 12
+select * from tab_data2
+
+Выполняется массовая вставка скорректированных данных Insert select 
+insert into tab_data select n, dtn, s from tab_data2
+
+При ошибках используется конструкция
+BEGIN
+  DBMS_ERRLOG.create_error_log ('tab_data');
+END;
+insert into tab_data select n, dtn, s from tab_data2
+LOG ERRORS INTO err$_tab_data ('SQL') REJECT LIMIT UNLIMITED;
+--
+select * from err$_tab_data
+
+После проверки удаляются все вспомогательные объекты Drop table
+
+drop table tab_data2-- purge --удаление полное
+drop table err$_tab_data --purge --удаление полное
+
+если удаление произошло в корзину данные можно восстановить
+
+выбор удаленных объектов пользователя
+  select * from user_recyclebin;
+выбор всех удаленных объектов
+  select * from dba_recyclebin;
+
+Чтобы удалить объеты из корзины:
+удалить все реинкарнации table1 из корзины
+purge table table1;
+удалить table1 из корзины по системному имени
+purge table "BIN$0Vq5kNlvTS6G/uyKOlzdAw==$0";
+удалить все объекты пользователя "FK" из тайблспейса ts_fk.
+purge tablespace ts_fk user fk;
+удалить все объекты  из тайблспейса ts_fk.
+purge tablespace ts_fk;
+удалить все объекты из корзины текущего пользователя
+purge recyclebin;
+удалить все объекты из корзины, включая системные объеткты
+purge dba_recyclebin;
+
+Подробнее о команде PURGE можно посмотреть здесь: Oracle® Database SQL Reference 10g Release 2 (10.2) PURGE
+
+Для восстановления удаленных таблиц нужно воспользоваться командами:
+востановить последению удаленную версию table1
+flashback table table1 to before drop;
+востановить УКАЗАННУЮ удаленнную версию table1
+flashback table "BIN$XXXXXXXXXXXXXXXX==$0" to before drop;
+
+
+2) Необходим доступ на создание таблиц, к табличному пространству и изменяемая таблица должна находиться в схеме пользователя, пошаговое выполнение: 
+create table tab_data as-- drop table tab_data purge
+select cast(rownum  as number(4)) n, to_date('01.01.2018','dd.mm.yyyy') + rownum/1000 dt, 
+rownum - trunc(rownum/31)* 31  s  from dual connect by rownum < 10000
+
+
+Пишется необходимый запрос, который сформирует скорректированные данные, и на его базе создается таблица, выполняется максимально быстро Create table as select
+create table tab_data2 as-- drop table tab_data2 purge
+select case when n/13 = trunc(n/13) and s = 12 then n + 100000 else n end n, 
+case when s = 12 then dt - 1/86400 else dt end dt,
+s from tab_data
+
+При наличии в источнике Индексов, ключей, … они создаются в новой таблице
+create index idx_tab_data on TAB_DATA2 (n, dt);
+
+Переименовывается изменяемая таблица, переименовывается  новая таблица на название изменяемой таблицы Rename  to 
+--
+rename tab_data to tab_data_old
+alter index idx_tab_data rename to idx_tab_data_old
+--
+rename tab_data2 to tab_data 
+alter index idx_tab_data2 rename to idx_tab_data
+
+При большом количестве Индексов, ключей, … можно временно их отключить
+alter index idx_tab_data unusable
+--
+alter session set skip_unusable_indexes = true
+
+Удалить данные в изменяемой таблице Truncate
+truncate table tab_data
+
+Вставить данные в изменяемую таблицу из Insert select 
+insert into tab_data select * from tab_data_old
+
+Включить индексы, ключи, …
+alter index idx_tab_data rebuild
+
+После проверки удаляются все вспомогательные объекты Drop table
+
+3) Необходим доступ на создание таблиц, к табличному пространству и изменяемая таблица должна находиться в схеме пользователя, пошаговое выполнение:
+create table tab_data partition by range (dt)
+(partition prt01 values less than (to_date('02.01.2018','dd.mm.yyyy')),
+partition prt02 values less than (to_date('03.01.2018','dd.mm.yyyy')),
+partition prt03 values less than (to_date('04.01.2018','dd.mm.yyyy')),
+partition prt04 values less than (to_date('05.01.2018','dd.mm.yyyy')),
+partition prt05 values less than (to_date('06.01.2018','dd.mm.yyyy')),
+partition prt06 values less than (to_date('07.01.2018','dd.mm.yyyy')),
+partition prt07 values less than (to_date('08.01.2018','dd.mm.yyyy')),
+partition prt08 values less than (to_date('09.01.2018','dd.mm.yyyy')),
+partition prt09 values less than (to_date('10.01.2018','dd.mm.yyyy')),
+partition prt10 values less than (to_date('11.01.2018','dd.mm.yyyy'))
+)
+as-- drop table tab_data purge
+select cast(rownum  as number(4)) n, to_date('01.01.2018','dd.mm.yyyy') + rownum/1000 dt, 
+rownum - trunc(rownum/31)* 31  s  from dual connect by rownum < 10000
+
+create index idx_tab_data on TAB_DATA (n, dt) local;
+
+Пишется необходимый запрос, который сформирует скорректированные данные (с соблюдением размерности полей), и на его базе создается таблица, выполняется максимально быстро Create table as select
+create table tab_data2 as-- drop table tab_data2 purge
+select case when n/13 = trunc(n/13) and s = 12 then n + 100000 else n end n, 
+case when s = 12 then dt - 1/86400 else dt end dt,
+s from tab_data partition (prt07) 
+
+create table tab_data2 as-- drop table tab_data2 purge
+select cast(case when n/13 = trunc(n/13) and s = 12 then n + 1 else n end as number(4)) n, 
+case when s = 12 then dt - 1 else dt end dt,
+s from tab_data partition (prt07)
+
+При наличии в источнике Индексов, ключей, … они создаются в новой таблице Create index
+create index idx_tab_data2 on TAB_DATA2 (n, dt)
+
+Данные партиции подменяются данными таблицы Alter table exchange partition
+ALTER TABLE TAB_DATA EXCHANGE PARTITION prt07
+WITH TABLE TAB_DATA2 INCLUDING INDEXES WITHOUT VALIDATION
+
+После проверки удаляются все вспомогательные объекты Drop table
+
+Литература:
+1)Oracle для профессионалов.  Том Кайт.
+2)OCA Oracle Database SQL Certified Expert  Exam Guide(Exam 1Z0-047). Steve O’Hearn
+3)www.google.com
+4) https://docs.oracle.com
